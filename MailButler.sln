@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.Core", "MailButler.Core\MailButler.Core.csproj", "{833EF12C-0006-4209-8B3F-CA126F2B49B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.Console", "MailButler.Console\MailButler.Console.csproj", "{FB282606-F91F-43A1-A570-0033922FB2C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.UseCases", "MailButler.UseCases\MailButler.UseCases.csproj", "{9A318685-8940-4ADA-8B25-9CAEEB15C0F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.Dtos", "MailButler.Dtos\MailButler.Dtos.csproj", "{DABAF517-7E3B-4BFF-839F-376C36721F33}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{833EF12C-0006-4209-8B3F-CA126F2B49B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{833EF12C-0006-4209-8B3F-CA126F2B49B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{833EF12C-0006-4209-8B3F-CA126F2B49B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{833EF12C-0006-4209-8B3F-CA126F2B49B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB282606-F91F-43A1-A570-0033922FB2C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB282606-F91F-43A1-A570-0033922FB2C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB282606-F91F-43A1-A570-0033922FB2C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB282606-F91F-43A1-A570-0033922FB2C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A318685-8940-4ADA-8B25-9CAEEB15C0F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A318685-8940-4ADA-8B25-9CAEEB15C0F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A318685-8940-4ADA-8B25-9CAEEB15C0F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A318685-8940-4ADA-8B25-9CAEEB15C0F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DABAF517-7E3B-4BFF-839F-376C36721F33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DABAF517-7E3B-4BFF-839F-376C36721F33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DABAF517-7E3B-4BFF-839F-376C36721F33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DABAF517-7E3B-4BFF-839F-376C36721F33}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
