@@ -3,7 +3,7 @@ using MediatR;
 
 namespace MailButler.UseCases.CheckConnections;
 
-public sealed class CheckConnectionsRequest: IRequest<CheckConnectionsResponse>
+public sealed class CheckConnectionsRequest : IRequest<CheckConnectionsResponse>
 {
-	public List<Account> Accounts { get; init; }
+	public List<Account> Accounts { get; init; } = new();
 }

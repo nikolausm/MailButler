@@ -1,3 +1,4 @@
+using Extensions.Dictionary;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Util;
@@ -24,7 +25,6 @@ public sealed class CheckConnectionsHandler : IRequestHandler<CheckConnectionsRe
 	{
 		Dictionary<Account, ConnectionStatus> connectionStatuses = new();
 		foreach (var account in request.Accounts)
-		{
 			try
 			{
 				switch (account.Type)
@@ -35,18 +35,31 @@ public sealed class CheckConnectionsHandler : IRequestHandler<CheckConnectionsRe
 					case AccountType.Imap:
 						await ConnectAndAuthenticateAsync(cancellationToken, account);
 						break;
+					case AccountType.None:
+						if (_logger.IsEnabled(LogLevel.Debug))
+							_logger.LogWarning(
+								"Account type is not set for account {Account}",
+								account.ToDictionary()
+							);
+
+						break;
 					default:
 						throw new NotImplementedException();
 				}
 
 				connectionStatuses.Add(account, new ConnectionStatus { Works = true });
 			}
-			catch (Exception e)
+			catch (Exception exception)
 			{
-				_logger.LogWarning(e, "Failed to connect to account {Account}", account);
-				connectionStatuses.Add(account, new ConnectionStatus { Works = false, Error = e.Message });
+				if (_logger.IsEnabled(LogLevel.Warning))
+					_logger.LogWarning(
+						exception,
+						"Failed to connect to account {Account}",
+						account.ToDictionary()
+					);
+
+				connectionStatuses.Add(account, new ConnectionStatus { Works = false, Error = exception.Message });
 			}
-		}
 
 		return new CheckConnectionsResponse
 		{
@@ -85,7 +98,8 @@ public sealed class CheckConnectionsHandler : IRequestHandler<CheckConnectionsRe
 
 		using ImapClient client = new();
 
-		await client.ConnectAsync("imap.gmail.com", account.ImapPort, SecureSocketOptions.SslOnConnect, cancellationToken);
+		await client.ConnectAsync("imap.gmail.com", account.ImapPort, SecureSocketOptions.SslOnConnect,
+			cancellationToken);
 		await client.AuthenticateAsync(oauth2, cancellationToken);
 		return client.IsAuthenticated && client.IsConnected;
 	}

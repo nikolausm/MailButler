@@ -2,6 +2,7 @@
 
 
 using MailButler.Console;
+using MailButler.UseCases;
 using MailButler.UseCases.CheckConnections;
 using MailKit;
 using MailKit.Net.Imap;
@@ -14,14 +15,14 @@ using Microsoft.Extensions.Options;
 var configuration = new ConfigurationBuilder()
 	.AddJsonFile("appsettings.json")
 	.AddJsonFile("appsettings." + Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") + ".json",
-		optional: true)
+		true)
 	.AddUserSecrets<MailButlerOptions>()
 	.AddEnvironmentVariables()
 	.Build();
 
 var services = new ServiceCollection();
 
-services.AddMediatR(typeof(MailButler.UseCases.AssemblyMarker));
+services.AddMediatR(typeof(AssemblyMarker));
 services.AddLogging(builder => builder.AddConsole());
 
 services.AddScoped<IMailFolder>(sp => sp.GetRequiredService<ImapClient>().Inbox);
@@ -29,7 +30,7 @@ services.AddSingleton<IConfiguration>(_ => configuration);
 
 services.Configure<MailButlerOptions>(configuration.GetSection("MailButler"));
 
-using IServiceScope scope = services.BuildServiceProvider().CreateScope();
+using var scope = services.BuildServiceProvider().CreateScope();
 
 var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 var options = scope.ServiceProvider.GetRequiredService<IOptions<MailButlerOptions>>();

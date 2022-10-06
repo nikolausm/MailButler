@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Extensions.Dictionary;
 using MailButler.Dtos;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,6 @@ public sealed class AmazonOrderEmailsHandler : IRequestHandler<AmazonOrderEmails
 	private const string AmazonOrderPattern = "\\d{3}-\\d{7}-\\d{7}";
 	private const string AmazonEmailFilter = ".@amazon.";
 	private readonly ILogger<AmazonOrderEmailsHandler> _logger;
-	private Dictionary<string, IList<uint>> _values = new();
 
 	public AmazonOrderEmailsHandler(
 		ILogger<AmazonOrderEmailsHandler> logger
@@ -19,7 +19,7 @@ public sealed class AmazonOrderEmailsHandler : IRequestHandler<AmazonOrderEmails
 		_logger = logger;
 	}
 
-	public async Task<AmazonOrderEmailsResponse> Handle(
+	public Task<AmazonOrderEmailsResponse> Handle(
 		AmazonOrderEmailsRequest request,
 		CancellationToken cancellationToken
 	)
@@ -34,37 +34,41 @@ public sealed class AmazonOrderEmailsHandler : IRequestHandler<AmazonOrderEmails
 				.ToList()
 				.ForEach(message => AddOrderInformation(message, orders));
 
-			return new AmazonOrderEmailsResponse
-			{
-				Result = orders
-			};
+			return Task.FromResult(
+				new AmazonOrderEmailsResponse
+				{
+					Result = orders
+				}
+			);
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
-			_logger.LogError(ex, "Failed to process Amazon Order Emails from {Request}", request);
-			return new AmazonOrderEmailsResponse
-			{
-				Status = Status.Failed,
-				Message = ex.Message,
-				Result = orders
-			};
+			if (_logger.IsEnabled(LogLevel.Error))
+				_logger.LogError(
+					exception,
+					"Failed to process Amazon Order Emails from {Request}",
+					request.ToDictionary()
+				);
+
+			return Task.FromResult(
+				new AmazonOrderEmailsResponse
+				{
+					Status = Status.Failed,
+					Message = exception.Message,
+					Result = orders
+				}
+			);
 		}
 	}
 
 	private static void AddOrderInformation(Email message, Dictionary<string, List<string>> orders)
 	{
 		// Get Order Numbers
-		foreach (Match match in Regex.Matches(TextValues(message), AmazonOrderPattern).Distinct())
+		foreach (var match in Regex.Matches(TextValues(message), AmazonOrderPattern).Distinct())
 		{
-			if (!orders.ContainsKey(match.Value))
-			{
-				orders.Add(match.Value, new List<string>());
-			}
+			if (!orders.ContainsKey(match.Value)) orders.Add(match.Value, new List<string>());
 
-			if (!orders[match.Value].Contains(message.Id))
-			{
-				orders[match.Value].Add(message.Id);
-			}
+			if (!orders[match.Value].Contains(message.Id)) orders[match.Value].Add(message.Id);
 		}
 	}
 
@@ -83,8 +87,8 @@ public sealed class AmazonOrderEmailsHandler : IRequestHandler<AmazonOrderEmails
 		_logger.LogTrace("Subject: {Subject}", message.Subject);
 
 		// Contains Text
-		string text = TextValues(message);
-		if (text is null)
+		var text = TextValues(message);
+		if (string.IsNullOrEmpty(text))
 		{
 			_logger.LogTrace("Empty Body");
 			return false;
@@ -102,6 +106,6 @@ public sealed class AmazonOrderEmailsHandler : IRequestHandler<AmazonOrderEmails
 
 	private static string TextValues(Email message)
 	{
-		return (message.TextBody ?? message.HtmlBody) + message.Subject is null ? "" : " - " + message.Subject;
+		return (message.TextBody ?? message.HtmlBody) + " - " + message.Subject;
 	}
 }

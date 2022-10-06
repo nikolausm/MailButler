@@ -9,8 +9,8 @@ namespace MailButler.UseCases.FetchEmails;
 
 public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, FetchEmailsResponse>
 {
-	private readonly IMailFolder _source;
 	private readonly ILogger<FetchEmailsHandler> _logger;
+	private readonly IMailFolder _source;
 
 	public FetchEmailsHandler(
 		IMailFolder source,
@@ -38,7 +38,7 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 
 			foreach (var id in ids)
 			{
-				MimeMessage? message = await _source.GetMessageAsync(id, cancellationToken);
+				var message = await _source.GetMessageAsync(id, cancellationToken);
 
 				emails.Add(
 					Email(message)
