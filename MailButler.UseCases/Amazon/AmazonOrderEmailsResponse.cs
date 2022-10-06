@@ -1,5 +1,4 @@
 using MailButler.Dtos;
-using MailButler.UseCases.FetchEmails;
 
 namespace MailButler.UseCases.Amazon;
 

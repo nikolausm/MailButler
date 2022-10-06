@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using MailButler.Dtos;
-using MailButler.UseCases.FetchEmails;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
