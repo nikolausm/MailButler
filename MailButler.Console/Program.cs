@@ -4,6 +4,8 @@
 using MailButler.Console;
 using MailButler.UseCases;
 using MailButler.UseCases.CheckConnections;
+using MailButler.UseCases.Extensions.DependencyInjection;
+using MailButler.UseCases.FetchEmails;
 using MailKit;
 using MailKit.Net.Imap;
 using MediatR;
@@ -21,11 +23,9 @@ var configuration = new ConfigurationBuilder()
 	.Build();
 
 var services = new ServiceCollection();
-
-services.AddMediatR(typeof(AssemblyMarker));
+services.AddUseCases();
 services.AddLogging(builder => builder.AddConsole());
 
-services.AddScoped<IMailFolder>(sp => sp.GetRequiredService<ImapClient>().Inbox);
 services.AddSingleton<IConfiguration>(_ => configuration);
 
 services.Configure<MailButlerOptions>(configuration.GetSection("MailButler"));
@@ -35,9 +35,18 @@ using var scope = services.BuildServiceProvider().CreateScope();
 var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 var options = scope.ServiceProvider.GetRequiredService<IOptions<MailButlerOptions>>();
 
-var result = await mediator.Send(new CheckConnectionsRequest
-{
-	Accounts = options.Value.Accounts
-});
+var result = await mediator.Send(
+	new CheckConnectionsRequest
+	{
+		Accounts = options.Value.Accounts
+	}
+);
 
-Console.WriteLine(result);
+var fetchEmailsResponse = await mediator.Send(
+	new FetchEmailsRequest
+	{
+		Account = result.Result.First().Key
+	}
+);
+
+Console.WriteLine("Found: " + fetchEmailsResponse.Result.Count);

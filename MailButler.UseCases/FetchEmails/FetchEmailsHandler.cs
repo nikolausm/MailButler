@@ -1,5 +1,8 @@
+using Extensions.Dictionary;
+using MailButler.Core;
 using MailButler.Dtos;
 using MailKit;
+using MailKit.Net.Imap;
 using MailKit.Search;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -10,14 +13,14 @@ namespace MailButler.UseCases.FetchEmails;
 public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, FetchEmailsResponse>
 {
 	private readonly ILogger<FetchEmailsHandler> _logger;
-	private readonly IMailFolder _source;
+	private readonly IImapClientFactory _imapClientFactory;
 
 	public FetchEmailsHandler(
-		IMailFolder source,
+		IImapClientFactory imapClientFactory,
 		ILogger<FetchEmailsHandler> logger
 	)
 	{
-		_source = source;
+		_imapClientFactory = imapClientFactory;
 		_logger = logger;
 	}
 
@@ -26,19 +29,21 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 		List<Email> emails = new();
 		try
 		{
-			await _source.OpenAsync(FolderAccess.ReadOnly, cancellationToken);
+			using ImapClient client = await _imapClientFactory.ImapClientAsync(request.Account, cancellationToken);
+			var source = client.Inbox;
+			await source.OpenAsync(FolderAccess.ReadOnly, cancellationToken);
 
-			_logger.LogTrace("Total messages: {TotalMessageCount}", _source.Count);
-			_logger.LogTrace("Recent messages: {RecentMessageCount}", _source.Recent);
+			_logger.LogTrace("Total messages: {TotalMessageCount}", source.Count);
+			_logger.LogTrace("Recent messages: {RecentMessageCount}", source.Recent);
 
-			var ids = await _source.SearchAsync(
+			var ids = await source.SearchAsync(
 				SearchQuery.SentSince(request.StartDate),
 				cancellationToken
 			);
 
 			foreach (var id in ids)
 			{
-				var message = await _source.GetMessageAsync(id, cancellationToken);
+				var message = await source.GetMessageAsync(id, cancellationToken);
 
 				emails.Add(
 					Email(message)
@@ -50,9 +55,17 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 				Result = emails
 			};
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
-			_logger.LogError(ex, "Error fetching emails for request {Request}", request);
+			if (_logger.IsEnabled(LogLevel.Error))
+			{
+				_logger.LogError(
+					exception,
+					"Error fetching emails for request {Request}",
+					request.ToDictionary()
+				);
+			}
+
 			return new FetchEmailsResponse
 			{
 				Message = "Error fetching emails",

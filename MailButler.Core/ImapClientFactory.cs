@@ -3,56 +3,44 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Util;
 using Google.Apis.Util.Store;
-using MailButler.Core;
 using MailButler.Dtos;
 using MailKit.Net.Imap;
 using MailKit.Security;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace MailButler.UseCases.CheckConnections;
+namespace MailButler.Core;
 
-public sealed class CheckConnectionsHandler : IRequestHandler<CheckConnectionsRequest, CheckConnectionsResponse>
+public sealed class ImapClientFactory : IImapClientFactory
 {
-	private readonly ILogger<CheckConnectionsHandler> _logger;
-	private readonly IImapClientFactory _imapClientFactory;
+	private readonly ILogger<ImapClientFactory> _logger;
 
-	public CheckConnectionsHandler(ILogger<CheckConnectionsHandler> logger, IImapClientFactory imapClientFactory)
+	public ImapClientFactory(ILogger<ImapClientFactory> logger)
 	{
 		_logger = logger;
-		_imapClientFactory = imapClientFactory;
 	}
 
-	public async Task<CheckConnectionsResponse> Handle(CheckConnectionsRequest request,
-		CancellationToken cancellationToken)
+	public async Task<ImapClient> ImapClientAsync(Account account, CancellationToken cancellationToken)
 	{
-		Dictionary<Account, ConnectionStatus> connectionStatuses = new();
-		foreach (var account in request.Accounts)
-			try
-			{
-				using ImapClient client = await _imapClientFactory.ImapClientAsync(account, cancellationToken);
-				
-				connectionStatuses.Add(account, new ConnectionStatus { Works = client.IsAuthenticated && client.IsConnected });
-			}
-			catch (Exception exception)
-			{
-				if (_logger.IsEnabled(LogLevel.Warning))
+		switch (account.Type)
+		{
+			case AccountType.OAuth2:
+				return await ConnectAndAuthenticateOAuth2Async(cancellationToken, account);
+			case AccountType.Imap:
+				return await ConnectAndAuthenticateAsync(cancellationToken, account);
+			case AccountType.None:
+				if (_logger.IsEnabled(LogLevel.Debug))
 					_logger.LogWarning(
-						exception,
-						"Failed to connect to account {Account}",
+						"Account type is not set for account {Account}",
 						account.ToDictionary()
 					);
+				throw new InvalidOperationException("None as Type ist not allowed");
 
-				connectionStatuses.Add(account, new ConnectionStatus { Works = false, Error = exception.Message });
-			}
-
-		return new CheckConnectionsResponse
-		{
-			Result = connectionStatuses
-		};
+			default:
+				throw new NotImplementedException();
+		}
 	}
 
-	private static async Task<bool> ConnectAndAuthenticateOAuth2Async(
+	private static async Task<ImapClient> ConnectAndAuthenticateOAuth2Async(
 		CancellationToken cancellationToken,
 		Account account
 	)
@@ -81,18 +69,18 @@ public sealed class CheckConnectionsHandler : IRequestHandler<CheckConnectionsRe
 
 		var oauth2 = new SaslMechanismOAuth2(credential.UserId, credential.Token.AccessToken);
 
-		using ImapClient client = new();
+		ImapClient client = new();
 
 		await client.ConnectAsync("imap.gmail.com", account.ImapPort, SecureSocketOptions.SslOnConnect,
 			cancellationToken);
 		await client.AuthenticateAsync(oauth2, cancellationToken);
-		return client.IsAuthenticated && client.IsConnected;
+		return client;
 	}
 
-	private static async Task<bool> ConnectAndAuthenticateAsync(CancellationToken cancellationToken,
+	private static async Task<ImapClient> ConnectAndAuthenticateAsync(CancellationToken cancellationToken,
 		Account account)
 	{
-		using ImapClient client = new();
+		ImapClient client = new();
 		await client.ConnectAsync(
 			account.ImapServer,
 			account.ImapPort,
@@ -100,6 +88,6 @@ public sealed class CheckConnectionsHandler : IRequestHandler<CheckConnectionsRe
 			cancellationToken
 		);
 		await client.AuthenticateAsync(account.Username, account.Password, cancellationToken);
-		return client.IsAuthenticated && client.IsConnected;
+		return client;
 	}
 }
