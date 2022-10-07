@@ -4,27 +4,27 @@ using MailButler.Dtos;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace MailButler.UseCases.Amazon;
+namespace MailButler.UseCases.Amazon.GetAmazonOrderEmails;
 
-public sealed class AmazonOrderEmailsHandler : IRequestHandler<AmazonOrderEmailsRequest, AmazonOrderEmailsResponse>
+public sealed class GetAmazonOrderEmailsHandler : IRequestHandler<GetAmazonOrderEmailsRequest, GetAmazonOrderEmailsResponse>
 {
 	private const string AmazonOrderPattern = "\\d{3}-\\d{7}-\\d{7}";
-	private const string AmazonEmailFilter = ".@amazon.";
-	private readonly ILogger<AmazonOrderEmailsHandler> _logger;
+	private const string AmazonEmailFilter = "@amazon.";
+	private readonly ILogger<GetAmazonOrderEmailsHandler> _logger;
 
-	public AmazonOrderEmailsHandler(
-		ILogger<AmazonOrderEmailsHandler> logger
+	public GetAmazonOrderEmailsHandler(
+		ILogger<GetAmazonOrderEmailsHandler> logger
 	)
 	{
 		_logger = logger;
 	}
 
-	public Task<AmazonOrderEmailsResponse> Handle(
-		AmazonOrderEmailsRequest request,
+	public Task<GetAmazonOrderEmailsResponse> Handle(
+		GetAmazonOrderEmailsRequest request,
 		CancellationToken cancellationToken
 	)
 	{
-		Dictionary<string, List<string>> orders = new();
+		Dictionary<Email, List<string>> orders = new();
 
 		try
 		{
@@ -35,7 +35,7 @@ public sealed class AmazonOrderEmailsHandler : IRequestHandler<AmazonOrderEmails
 				.ForEach(message => AddOrderInformation(message, orders));
 
 			return Task.FromResult(
-				new AmazonOrderEmailsResponse
+				new GetAmazonOrderEmailsResponse
 				{
 					Result = orders
 				}
@@ -51,7 +51,7 @@ public sealed class AmazonOrderEmailsHandler : IRequestHandler<AmazonOrderEmails
 				);
 
 			return Task.FromResult(
-				new AmazonOrderEmailsResponse
+				new GetAmazonOrderEmailsResponse
 				{
 					Status = Status.Failed,
 					Message = exception.Message,
@@ -61,14 +61,17 @@ public sealed class AmazonOrderEmailsHandler : IRequestHandler<AmazonOrderEmails
 		}
 	}
 
-	private static void AddOrderInformation(Email message, Dictionary<string, List<string>> orders)
+	private static void AddOrderInformation(Email message, Dictionary<Email, List<string>> orders)
 	{
 		// Get Order Numbers
 		foreach (var match in Regex.Matches(TextValues(message), AmazonOrderPattern).Distinct())
 		{
-			if (!orders.ContainsKey(match.Value)) orders.Add(match.Value, new List<string>());
+			if (!orders.ContainsKey(message)) orders.Add(message, new List<string>());
 
-			if (!orders[match.Value].Contains(message.Id)) orders[match.Value].Add(message.Id);
+			if (!orders[message].Contains(match.Value))
+			{
+				orders[message].Add(match.Value);
+			}
 		}
 	}
 
@@ -106,6 +109,6 @@ public sealed class AmazonOrderEmailsHandler : IRequestHandler<AmazonOrderEmails
 
 	private static string TextValues(Email message)
 	{
-		return (message.TextBody ?? message.HtmlBody) + " - " + message.Subject;
+		return (message.TextBody ?? "") + " - " + (message.HtmlBody ?? " ") + " - " + message.Subject;
 	}
 }

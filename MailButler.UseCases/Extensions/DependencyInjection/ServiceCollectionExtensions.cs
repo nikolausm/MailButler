@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
 	public static IServiceCollection AddUseCases(this IServiceCollection services)
 	{
 		services.TryAddSingleton<IImapClientFactory, ImapClientFactory>();
+		services.TryAddSingleton<ISmtpClientFactory, SmtpClientFactory>();
 		services.AddMediatR(typeof(AssemblyMarker));
 		
 		return services;

@@ -4,31 +4,28 @@ using MailButler.Dtos;
 using MailButler.UseCases.Extensions;
 using MailKit;
 using MailKit.Net.Imap;
-using MailKit.Search;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using MimeKit;
-using UniqueId = MailButler.Dtos.UniqueId;
 
-namespace MailButler.UseCases.FetchEmails;
+namespace MailButler.UseCases.FetchEmailById;
 
-public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, FetchEmailsResponse>
+public sealed class FetchEmailByIdHandler : IRequestHandler<FetchEmailByIdRequest, FetchEmailByIdResponse>
 {
-	private readonly ILogger<FetchEmailsHandler> _logger;
+	private readonly ILogger<FetchEmailByIdHandler> _logger;
 	private readonly IImapClientFactory _imapClientFactory;
 
-	public FetchEmailsHandler(
+	public FetchEmailByIdHandler(
 		IImapClientFactory imapClientFactory,
-		ILogger<FetchEmailsHandler> logger
+		ILogger<FetchEmailByIdHandler> logger
 	)
 	{
 		_imapClientFactory = imapClientFactory;
 		_logger = logger;
 	}
 
-	public async Task<FetchEmailsResponse> Handle(FetchEmailsRequest request, CancellationToken cancellationToken)
+	public async Task<FetchEmailByIdResponse> Handle(FetchEmailByIdRequest request, CancellationToken cancellationToken)
 	{
-		List<Email> emails = new();
 		try
 		{
 			using ImapClient client = await _imapClientFactory.ImapClientAsync(request.Account, cancellationToken);
@@ -37,24 +34,26 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 
 			_logger.LogTrace("Total messages: {TotalMessageCount}", source.Count);
 			_logger.LogTrace("Recent messages: {RecentMessageCount}", source.Recent);
-
-			IList<MailKit.UniqueId>? ids = await source.SearchAsync(
-				SearchQuery.SentSince(request.StartDate),
+			
+			MimeMessage message = await source.GetMessageAsync(
+					new MailKit.UniqueId(request.EmailId.Id, request.EmailId.Validity),
+					cancellationToken);
+			
+			IList<IMessageSummary> messageSummaries = await source.FetchAsync(
+				new List<MailKit.UniqueId>
+				{
+					new (request.EmailId.Id, request.EmailId.Validity)
+				},
+				MessageSummaryItems.Flags,
 				cancellationToken
 			);
 
-			List<MimeMessage> messages = new();
-			ids.ToList().ForEach(id => messages.Add(source.GetMessageAsync(id, cancellationToken).GetAwaiter().GetResult()));
-			var messageSummaries = await source.FetchAsync(ids, MessageSummaryItems.Flags, cancellationToken);
-
-			for (int i = 0; i < ids.Count; i++)
+			Email mail = message.ToEmail(messageSummaries.Single().Flags!.Value, 
+				new MailKit.UniqueId(request.EmailId.Id, request.EmailId.Validity));
+			
+			return new FetchEmailByIdResponse
 			{
-				emails.Add(messages[i].ToEmail(messageSummaries[i].Flags!.Value, ids[i]));
-			}
-
-			return new FetchEmailsResponse
-			{
-				Result = emails
+				Result = mail
 			};
 		}
 		catch (Exception exception)
@@ -68,11 +67,11 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 				);
 			}
 
-			return new FetchEmailsResponse
+			return new FetchEmailByIdResponse
 			{
 				Message = "Error fetching emails",
 				Status = Status.Failed,
-				Result = emails
+				Result = new Email()
 			};
 		}
 	}
