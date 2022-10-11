@@ -9,7 +9,7 @@ public sealed class SmtpClientFactory : ISmtpClientFactory
 	public async Task<SmtpClient> SmtpClientAsync(Account account, CancellationToken cancellationToken)
 	{
 		var smtp = new SmtpClient();
-		await smtp.ConnectAsync(account.SmtpServer, account.SmtpPort, SecureSocketOptions.StartTls, cancellationToken);
+		await smtp.ConnectAsync(account.SmtpServer, account.SmtpPort, SecureSocketOptions.Auto, cancellationToken);
 		await smtp.AuthenticateAsync(account.Username, account.Password, cancellationToken);
 		return smtp;
 	}

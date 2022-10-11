@@ -1,9 +1,8 @@
-
-
 namespace MailButler.Dtos;
 
 public record Email
 {
+	public Guid AccountId { get; init; } = Guid.Empty;
 	public string Subject { get; init; } = string.Empty;
 	public string? TextBody { get; init; }
 	public string? HtmlBody { get; init; }

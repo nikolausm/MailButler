@@ -8,6 +8,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.UseCases", "Mail
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.Dtos", "MailButler.Dtos\MailButler.Dtos.csproj", "{DABAF517-7E3B-4BFF-839F-376C36721F33}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.MailRules", "MailButler.MailRules\MailButler.MailRules.csproj", "{A14E1B8A-F6C9-476E-BF73-2F7330DA0F67}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.Api", "MailButler.Api\MailButler.Api.csproj", "{6DB2722D-552C-4E8C-AE35-1ACA61E47990}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.DataAccess", "MailButler.DataAccess\MailButler.DataAccess.csproj", "{F4DE51B2-009E-4DEC-936A-1FCCFAFA557D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.DataAccess.Database.MsSql", "MailButler.DataAccess.Database.MsSql\MailButler.DataAccess.Database.MsSql.csproj", "{2D96776E-363C-4EF8-9CD2-D55367E5858D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +38,21 @@ Global
 		{DABAF517-7E3B-4BFF-839F-376C36721F33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DABAF517-7E3B-4BFF-839F-376C36721F33}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DABAF517-7E3B-4BFF-839F-376C36721F33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A14E1B8A-F6C9-476E-BF73-2F7330DA0F67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A14E1B8A-F6C9-476E-BF73-2F7330DA0F67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A14E1B8A-F6C9-476E-BF73-2F7330DA0F67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A14E1B8A-F6C9-476E-BF73-2F7330DA0F67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DB2722D-552C-4E8C-AE35-1ACA61E47990}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DB2722D-552C-4E8C-AE35-1ACA61E47990}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DB2722D-552C-4E8C-AE35-1ACA61E47990}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DB2722D-552C-4E8C-AE35-1ACA61E47990}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4DE51B2-009E-4DEC-936A-1FCCFAFA557D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4DE51B2-009E-4DEC-936A-1FCCFAFA557D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4DE51B2-009E-4DEC-936A-1FCCFAFA557D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4DE51B2-009E-4DEC-936A-1FCCFAFA557D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D96776E-363C-4EF8-9CD2-D55367E5858D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D96776E-363C-4EF8-9CD2-D55367E5858D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D96776E-363C-4EF8-9CD2-D55367E5858D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D96776E-363C-4EF8-9CD2-D55367E5858D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

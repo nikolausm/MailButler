@@ -19,6 +19,11 @@
     <ItemGroup>
         <ProjectReference Include="..\MailButler.Core\MailButler.Core.csproj" />
         <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj" />
+        <ProjectReference Include="..\MailButler.MailRules\MailButler.MailRules.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Komponents" />
     </ItemGroup>
 
 </Project>

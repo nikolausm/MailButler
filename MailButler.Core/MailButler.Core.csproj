@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj" />
+        <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj" />
     </ItemGroup>
 
 </Project>
