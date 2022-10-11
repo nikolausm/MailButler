@@ -46,13 +46,13 @@ var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLo
 
 var tokenSource = new CancellationTokenSource();
 
-const int HourToRun = 23;
+List<int> hoursToRun = new() { 7, 12, 21 };
 logger.LogInformation("Started this Service: {Date:yyyy-MM-dd}", DateTime.Now);
 while (!tokenSource.IsCancellationRequested)
 {
-	while (DateTime.Now.Hour != HourToRun)
+	while (hoursToRun.Contains(DateTime.Now.Hour))
 	{
-		await Task.Delay(1000 * 60);
+		await Task.Delay(1000 * 60 * 60);
 	}
 	
 	using (var _ = logger.BeginScope("MailButler"))
@@ -63,8 +63,8 @@ while (!tokenSource.IsCancellationRequested)
 		logger.LogInformation("Finished run for {Date:yyyy-MM-dd}", DateTime.Today);
 	}
 	
-	while (DateTime.Now.Hour == HourToRun)
+	while (hoursToRun.Contains(DateTime.Now.Hour))
 	{
-		await Task.Delay(1000 * 60);
+		await Task.Delay(1000 * 60 * 60);
 	}
 }

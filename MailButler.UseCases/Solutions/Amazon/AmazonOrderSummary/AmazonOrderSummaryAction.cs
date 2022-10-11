@@ -123,8 +123,6 @@ public sealed class AmazonOrderSummaryAction
 
 		foreach (var account in getAmazonOrderEmailsResponse.Result.Keys.Select(d => d.AccountId).Distinct())
 		{
-			continue;
-			
 			MarkAsReadResponse markAsReadResponse = await _mediator.Send(
 				new MarkAsReadRequest
 				{
