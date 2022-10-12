@@ -1,12 +1,12 @@
 using MailButler.Dtos;
 using MailButler.MailRules.Filter;
-using MailButler.UseCases.Komponents.Amazon.GetAmazonOrderEmails;
-using MailButler.UseCases.Komponents.Amazon.GetAmazonOrderSummary;
-using MailButler.UseCases.Komponents.CheckConnections;
-using MailButler.UseCases.Komponents.EmailsMatchAgainstRule;
-using MailButler.UseCases.Komponents.FetchEmails;
-using MailButler.UseCases.Komponents.MarkAsRead;
-using MailButler.UseCases.Komponents.SendEmail;
+using MailButler.UseCases.Components.Amazon.GetAmazonOrderEmails;
+using MailButler.UseCases.Components.Amazon.GetAmazonOrderSummary;
+using MailButler.UseCases.Components.CheckConnections;
+using MailButler.UseCases.Components.EmailsMatchAgainstRule;
+using MailButler.UseCases.Components.FetchEmails;
+using MailButler.UseCases.Components.MarkAsRead;
+using MailButler.UseCases.Components.SendEmail;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -18,13 +18,18 @@ public sealed class AmazonOrderSummaryAction
 	private readonly IList<Account> _accounts;
 	private readonly ILogger<AmazonOrderSummaryAction> _logger;
 
-	public AmazonOrderSummaryAction(IMediator mediator, IList<Account> accounts, ILogger<AmazonOrderSummaryAction> logger)
+	public AmazonOrderSummaryAction(
+		IMediator mediator,
+		IList<Account> accounts,
+		ILogger<AmazonOrderSummaryAction> logger
+	)
 	{
 		_mediator = mediator;
 		_accounts = accounts;
 		_logger = logger;
 	}
-	public async Task ExecuteAsync(CancellationToken cancellationToken)
+
+	public async Task ExecuteAsync(AmazonOrderSummaryRequest request, CancellationToken cancellationToken)
 	{
 		var checkConnectionsResponse = await _mediator.Send(
 			new CheckConnectionsRequest
@@ -39,33 +44,42 @@ public sealed class AmazonOrderSummaryAction
 			return;
 		}
 
-		List<Email> emails = new();
-		var items = checkConnectionsResponse.Result.Keys.Select(account =>
-			_mediator.Send(
-				new FetchEmailsRequest
-				{
-					Account = account
-				}, cancellationToken
-			)
-		).ToList();
+		List<Task<(List<Email> Emails, Account Account)>> items = checkConnectionsResponse
+			.Result
+			.Keys
+			.Select(
+				account => Task.Run(
+					async () => (
+						(await _mediator.Send(
+								new FetchEmailsRequest
+								{
+									Account = account
+								}, cancellationToken
+							)
+						).Result, account
+					)
+				)
+			).ToList();
 
 		await Task.WhenAll(items);
 
-		items.ForEach(finishedTask =>
-		{
-			_logger.LogInformation(
-				"Add {AmountOfEmails} emails from {AccountId}",
-				finishedTask.Result.Result.Count,
-				finishedTask.Result.Result.First().AccountId
-			);
-			emails.AddRange(finishedTask.Result.Result);
-		});
+
+		items.ForEach(
+			finishedTask =>
+			{
+				_logger.LogInformation(
+					"Add {AmountOfEmails} emails from {AccountId}",
+					finishedTask.Result.Emails.Count,
+					finishedTask.Result.Account
+				);
+			}
+		);
 
 
 		EmailsMatchAgainstRuleResponse emailMatchAgainstRuleResponse = await _mediator.Send(
 			new EmailsMatchAgainstRuleRequest
 			{
-				Emails = emails,
+				Emails = items.SelectMany(resultOfTask => resultOfTask.Result.Emails).ToList(),
 				Filter = new Filter(
 					Field.SenderAddress,
 					FilterType.Contains,
@@ -87,7 +101,7 @@ public sealed class AmazonOrderSummaryAction
 			_logger.LogError("Failed to get amazon order emails: {Message}", getAmazonOrderEmailsResponse.Message);
 			return;
 		}
-		
+
 		GetAmazonOrderEmailsSummaryResponse getSummaryEmailForAmazon = await _mediator.Send(
 			new GetAmazonOrderEmailsSummaryRequest
 			{
@@ -103,14 +117,11 @@ public sealed class AmazonOrderSummaryAction
 			);
 			return;
 		}
-
-		var iCloudAccount = _accounts
-			.Single(account => account.Id == Guid.Parse("cdae6e37-91c6-4103-b779-ad800107ad1b"));
-
+		
 		SendEmailResponse sendEmailResponse = await _mediator.Send(
 			new SendEmailRequest
 			{
-				Account = iCloudAccount,
+				Account = request.SmtpAccount,
 				Email = getSummaryEmailForAmazon.Result
 			}, cancellationToken
 		);

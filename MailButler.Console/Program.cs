@@ -3,7 +3,7 @@
 using Google.Apis.Util;
 using MailButler.Dtos;
 using MailButler.MailRules.Filter;
-using MailButler.UseCases.Komponents.Extensions.DependencyInjection;
+using MailButler.UseCases.Components.Extensions.DependencyInjection;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -43,7 +43,7 @@ services.AddTransient<AmazonOrderSummaryAction>();
 using var scope = services.BuildServiceProvider().CreateScope();
 
 var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<Program>();
-
+var smtpAccount = scope.ServiceProvider.GetRequiredService<IList<Account>>().First(r => r.Name.Contains("iCloud", StringComparison.InvariantCultureIgnoreCase));
 var tokenSource = new CancellationTokenSource();
 
 List<int> hoursToRun = new() { 7, 12, 21 };
@@ -54,15 +54,20 @@ while (!tokenSource.IsCancellationRequested)
 	{
 		await Task.Delay(1000 * 60 * 60);
 	}
-	
+
 	using (var _ = logger.BeginScope("MailButler"))
 	{
 		logger.LogInformation("Starting");
 		await scope.ServiceProvider.GetRequiredService<AmazonOrderSummaryAction>()
-			.ExecuteAsync(CancellationToken.None);
+			.ExecuteAsync(
+				new AmazonOrderSummaryRequest
+				{
+					SmtpAccount = smtpAccount
+				}, tokenSource.Token
+			);
 		logger.LogInformation("Finished run for {Date:yyyy-MM-dd}", DateTime.Today);
 	}
-	
+
 	while (hoursToRun.Contains(DateTime.Now.Hour))
 	{
 		await Task.Delay(1000 * 60 * 60);
