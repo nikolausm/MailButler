@@ -7,5 +7,5 @@ public enum Actions
 	[Display(Name = "No Action")] Unknown,
 
 	[Display(Name = "Amazon Order Summary")]
-	AmazonOderSummary
+	AmazonOrderSummary
 }

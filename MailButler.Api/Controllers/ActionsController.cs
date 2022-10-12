@@ -27,7 +27,7 @@ public class ActionsController : ControllerBase
 		{
 			switch (action)
 			{
-				case Actions.AmazonOderSummary:
+				case Actions.AmazonOrderSummary:
 					var smtpAccount = _scope.ServiceProvider.GetRequiredService<IList<Account>>()
 						.First(r => r.Name.Contains("iCloud", StringComparison.InvariantCultureIgnoreCase));
 					_logger.LogInformation("Starting");
