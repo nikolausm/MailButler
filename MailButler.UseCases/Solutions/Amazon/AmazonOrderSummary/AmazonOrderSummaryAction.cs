@@ -14,9 +14,9 @@ namespace MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 
 public sealed class AmazonOrderSummaryAction
 {
-	private readonly IMediator _mediator;
 	private readonly IList<Account> _accounts;
 	private readonly ILogger<AmazonOrderSummaryAction> _logger;
+	private readonly IMediator _mediator;
 
 	public AmazonOrderSummaryAction(
 		IMediator mediator,
@@ -70,13 +70,13 @@ public sealed class AmazonOrderSummaryAction
 				_logger.LogInformation(
 					"Add {AmountOfEmails} emails from {AccountId}",
 					finishedTask.Result.Emails.Count,
-					finishedTask.Result.Account
+					finishedTask.Result.Account.Name
 				);
 			}
 		);
 
 
-		EmailsMatchAgainstRuleResponse emailMatchAgainstRuleResponse = await _mediator.Send(
+		var emailMatchAgainstRuleResponse = await _mediator.Send(
 			new EmailsMatchAgainstRuleRequest
 			{
 				Emails = items.SelectMany(resultOfTask => resultOfTask.Result.Emails).ToList(),
@@ -91,7 +91,7 @@ public sealed class AmazonOrderSummaryAction
 				)
 			}, cancellationToken);
 
-		GetAmazonOrderEmailsResponse getAmazonOrderEmailsResponse = await _mediator.Send(new GetAmazonOrderEmailsRequest
+		var getAmazonOrderEmailsResponse = await _mediator.Send(new GetAmazonOrderEmailsRequest
 		{
 			Emails = emailMatchAgainstRuleResponse.Result
 		}, cancellationToken);
@@ -102,7 +102,13 @@ public sealed class AmazonOrderSummaryAction
 			return;
 		}
 
-		GetAmazonOrderEmailsSummaryResponse getSummaryEmailForAmazon = await _mediator.Send(
+		if (getAmazonOrderEmailsResponse.Result.Count(email => !email.Key.IsRead) == 0)
+		{
+			_logger.LogInformation("No unread amazon order emails found");
+			return;
+		}
+
+		var getSummaryEmailForAmazon = await _mediator.Send(
 			new GetAmazonOrderEmailsSummaryRequest
 			{
 				EmailsWithOrders = getAmazonOrderEmailsResponse.Result
@@ -117,8 +123,8 @@ public sealed class AmazonOrderSummaryAction
 			);
 			return;
 		}
-		
-		SendEmailResponse sendEmailResponse = await _mediator.Send(
+
+		var sendEmailResponse = await _mediator.Send(
 			new SendEmailRequest
 			{
 				Account = request.SmtpAccount,
@@ -134,7 +140,7 @@ public sealed class AmazonOrderSummaryAction
 
 		foreach (var account in getAmazonOrderEmailsResponse.Result.Keys.Select(d => d.AccountId).Distinct())
 		{
-			MarkAsReadResponse markAsReadResponse = await _mediator.Send(
+			var markAsReadResponse = await _mediator.Send(
 				new MarkAsReadRequest
 				{
 					Account = _accounts.Single(a => a.Id == account),
@@ -143,9 +149,7 @@ public sealed class AmazonOrderSummaryAction
 			);
 
 			if (markAsReadResponse.Status == Status.Failed)
-			{
 				_logger.LogError("Failed to mark emails as read: {Message}", markAsReadResponse.Message);
-			}
 		}
 
 

@@ -116,10 +116,7 @@ public sealed class
 		if (_logger.IsEnabled(LogLevel.Debug))
 		{
 			var value = Value(email, filter.Field);
-			if (value.Length > 40)
-			{
-				value = value.Substring(0, 40) + "...";
-			}
+			if (value.Length > 40) value = value.Substring(0, 40) + "...";
 
 			_logger.LogTrace(
 				"{Filter} returns {Result} for {Email} from {From} where Value: {Value}",

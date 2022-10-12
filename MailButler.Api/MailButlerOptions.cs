@@ -1,6 +1,6 @@
 using MailButler.Dtos;
 
-namespace MailButler.Console;
+namespace MailButler.Api;
 
 public sealed class MailButlerOptions
 {

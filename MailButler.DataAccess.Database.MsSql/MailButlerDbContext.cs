@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MailButler.DataAccess.Database.MsSql;
 
-public partial class MailButlerDbContext: DbContext
+public class MailButlerDbContext : DbContext
 {
 	public DbSet<Account> Accounts { get; init; } = default!;
 	public DbSet<Filter> Filters { get; init; } = default!;

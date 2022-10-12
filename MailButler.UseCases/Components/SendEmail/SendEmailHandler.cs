@@ -39,8 +39,6 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailRequest, SendEma
 
 	private static MimeMessage MimeMessage(string from, Email email, Account account)
 	{
-		
-		
 		var message = new MimeMessage();
 		message.From.Add(new MailboxAddress(from, account.Username));
 		message.To.Add(new MailboxAddress(account.Name, account.Username));

@@ -1,4 +1,3 @@
-using Extensions.Dictionary;
 using MailButler.Core;
 using MailButler.Dtos;
 using MailButler.UseCases.Components.Extensions;
@@ -47,7 +46,7 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 			var messageSummaries = await source.FetchAsync(ids, MessageSummaryItems.Flags, cancellationToken);
 
 			for (var i = 0; i < ids.Count; i++)
-				emails.Add(messages[i].ToEmail(messageSummaries[i].Flags!.Value, ids[i], request.Account.Id ));
+				emails.Add(messages[i].ToEmail(messageSummaries[i].Flags!.Value, ids[i], request.Account.Id));
 
 			return new FetchEmailsResponse
 			{
@@ -60,12 +59,12 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 				_logger.LogError(
 					exception,
 					"Error fetching emails for request {Request}",
-					request.ToDictionary()
+					request.ToString()
 				);
 
 			return new FetchEmailsResponse
 			{
-				Message = "Error fetching emails",
+				Message = $"Error fetching emails from account {request.Account.Name}",
 				Status = Status.Failed,
 				Result = emails
 			};

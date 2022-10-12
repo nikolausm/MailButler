@@ -7,23 +7,27 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Extensions.Dictionary" Version="2.2.6" />
-        <PackageReference Include="Google.Apis.Auth" Version="1.57.0" />
-        <PackageReference Include="MailKit" Version="3.4.1" />
-        <PackageReference Include="MediatR" Version="11.0.0" />
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
-        <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
+        <PackageReference Include="Extensions.Dictionary" Version="2.2.6"/>
+        <PackageReference Include="Fody" Version="6.6.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Google.Apis.Auth" Version="1.57.0"/>
+        <PackageReference Include="MailKit" Version="3.4.1"/>
+        <PackageReference Include="MediatR" Version="11.0.0"/>
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2"/>
+        <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MailButler.Core\MailButler.Core.csproj" />
-        <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj" />
-        <ProjectReference Include="..\MailButler.MailRules\MailButler.MailRules.csproj" />
+        <ProjectReference Include="..\MailButler.Core\MailButler.Core.csproj"/>
+        <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj"/>
+        <ProjectReference Include="..\MailButler.MailRules\MailButler.MailRules.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Components" />
+        <Folder Include="Components"/>
     </ItemGroup>
 
 </Project>

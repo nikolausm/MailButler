@@ -22,7 +22,7 @@ public sealed class MarkAsReadHandler : IRequestHandler<MarkAsReadRequest, MarkA
 			using var client = await _clientFactory.ImapClientAsync(request.Account, cancellationToken);
 
 			await client.Inbox.OpenAsync(FolderAccess.ReadWrite, cancellationToken);
-			
+
 			await client.Inbox.AddFlagsAsync(
 				request.Emails.Where(email => !email.IsRead)
 					.Select(email => new UniqueId(email.Id.Id, email.Id.Validity))

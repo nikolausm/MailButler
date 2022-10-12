@@ -222,7 +222,9 @@ public struct UniqueId : IComparable<UniqueId>, IEquatable<UniqueId>
 	///     <see cref="T:MailKit.UniqueId" />;
 	///     otherwise, <c>false</c>.
 	/// </returns>
+#pragma warning disable CS8765
 	public override bool Equals(object obj)
+#pragma warning restore CS8765
 	{
 		return obj is UniqueId uniqueId && (int)uniqueId.Id == (int)Id;
 	}

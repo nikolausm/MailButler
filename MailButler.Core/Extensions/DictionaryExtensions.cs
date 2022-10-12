@@ -13,7 +13,7 @@ public static class DictionaryExtensions
 	public static string? ToString<T>(this IDictionary<string, object?> origin)
 		where T : notnull
 	{
-		return "Filter: " + String.Join(" - ",
+		return "Filter: " + string.Join(" - ",
 			origin
 				.Select(kv => $"{kv.Key}: {kv.Value}\r\n")
 		);

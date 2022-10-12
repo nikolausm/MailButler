@@ -13,4 +13,9 @@ public sealed record Account
 	public string? SmtpServer { get; init; }
 	public int SmtpPort { get; init; } = 0;
 	public string Name { get; init; } = string.Empty;
+
+	public override string ToString()
+	{
+		return $"{{Id: {Id}, Name: {Name}}}";
+	}
 }

@@ -22,11 +22,6 @@ public record Filter : IFilter
 		LogicalOperator = logicalOperator;
 	}
 
-	public override string? ToString()
-	{
-		return this.ToDictionaryAsString();
-	}
-
 	public Field Field { get; init; }
 	public LogicalOperator LogicalOperator { get; init; } = LogicalOperator.None;
 	public string Value { get; init; } = "";
@@ -60,6 +55,11 @@ public record Filter : IFilter
 	public IFilters And(Field field, FilterType filterType, string value)
 	{
 		return new BaseFilters(this, new AndFilter(field, filterType, value));
+	}
+
+	public override string? ToString()
+	{
+		return this.ToDictionaryAsString();
 	}
 
 	public static IFilters Create(Field field, FilterType filterType, string value)

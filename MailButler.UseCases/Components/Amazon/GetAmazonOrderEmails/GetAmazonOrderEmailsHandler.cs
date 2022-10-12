@@ -6,7 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace MailButler.UseCases.Components.Amazon.GetAmazonOrderEmails;
 
-public sealed class GetAmazonOrderEmailsHandler : IRequestHandler<GetAmazonOrderEmailsRequest, GetAmazonOrderEmailsResponse>
+public sealed class
+	GetAmazonOrderEmailsHandler : IRequestHandler<GetAmazonOrderEmailsRequest, GetAmazonOrderEmailsResponse>
 {
 	private const string AmazonOrderPattern = "\\d{3}-\\d{7}-\\d{7}";
 	private const string AmazonEmailFilter = "@amazon.";
@@ -67,10 +68,7 @@ public sealed class GetAmazonOrderEmailsHandler : IRequestHandler<GetAmazonOrder
 		{
 			if (!orders.ContainsKey(message)) orders.Add(message, new List<string>());
 
-			if (!orders[message].Contains(match.Value))
-			{
-				orders[message].Add(match.Value);
-			}
+			if (!orders[message].Contains(match.Value)) orders[message].Add(match.Value);
 		}
 	}
 
