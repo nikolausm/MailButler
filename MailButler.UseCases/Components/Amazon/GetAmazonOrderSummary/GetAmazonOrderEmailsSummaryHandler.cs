@@ -89,7 +89,32 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 		StringBuilder htmlBody = new(HtmlLogo());
 
 		var accounts = _accounts.ToDictionary(e => e.Id, account => account);
+
+		var sellerEmails = UnreadSellerEmails(emailsWithOrders);
+		if (sellerEmails.Any(e => !e.Key.IsRead))
+		{
+			var ordersInSellerEmails = sellerEmails.Sum(ite => ite.Value.Count);
+			htmlBody.AppendLine($"<h2>Sold on Amazon: <i>{ordersInSellerEmails}</i></h2>");
+			htmlBody.AppendLine("<p>");
+			foreach (var sellerEmail in sellerEmails.GroupBy(e => e.Key.Subject))
+			{
+				htmlBody.AppendLine($"<h3>{sellerEmail.Key} <i>({sellerEmail.Sum(ite => ite.Value.Count)})</i></h3>");
+				htmlBody.AppendLine("<ol>");
+				htmlBody.AppendJoin(
+					"\r\n",
+					sellerEmail
+						.SelectMany(item => item.Value)
+						.Select(item => $" <li>{item}</li>")
+				);
+				htmlBody.AppendLine("</ol>");
+			}
+
+			htmlBody.AppendLine("</p>");
+			htmlBody.AppendLine();
+		}
+
 		foreach (var order in emailsWithOrders
+			         .Where(item => !IsAmazonSellerEmail(item))
 			         .OrderByDescending(e => e.Key.Sent)
 			         .SelectMany(e => e.Value)
 			         .Distinct()
@@ -122,7 +147,28 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 	{
 		StringBuilder textBody = new();
 		var accounts = _accounts.ToDictionary(e => e.Id, account => account);
+
+		var sellerEmails = UnreadSellerEmails(emailsWithOrders);
+		if (sellerEmails.Any(e => !e.Key.IsRead))
+		{
+			var ordersInSellerEmails = sellerEmails.Sum(ite => ite.Value.Count);
+			textBody.AppendLine($"Sold on Amazon: {ordersInSellerEmails}");
+			foreach (var sellerEmail in sellerEmails.GroupBy(e => e.Key.Subject))
+			{
+				textBody.AppendLine($" {sellerEmail.Key}: {sellerEmail.Sum(ite => ite.Value.Count)}");
+				textBody.AppendJoin(
+					"\r\n",
+					sellerEmail
+						.SelectMany(item => item.Value)
+						.Select(item => $" - {item}")
+				);
+			}
+
+			textBody.AppendLine();
+		}
+
 		foreach (var order in emailsWithOrders
+			         .Where(item => !IsAmazonSellerEmail(item))
 			         .OrderByDescending(e => e.Key.Sent)
 			         .SelectMany(e => e.Value)
 			         .Distinct()
@@ -140,9 +186,24 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 				lines.Add($"- {(email.Key.IsRead ? "*" : "")}{email.Key.Sent:yyyy-MM-dd}: {email.Key.Subject}");
 
 			textBody.AppendJoin("\r\n", lines);
-			textBody.AppendLine("\r\n");
+			textBody.AppendLine();
 		}
 
 		return textBody.ToString();
+	}
+
+	private static bool IsAmazonSellerEmail(KeyValuePair<Email, List<string>> email)
+	{
+		return email.Key.Sender.Address == "donotreply@amazon.com";
+	}
+
+	private static List<KeyValuePair<Email, List<string>>> UnreadSellerEmails(
+		Dictionary<Email, List<string>> emailsWithOrders)
+	{
+		return emailsWithOrders
+			.Where(item => IsAmazonSellerEmail(item))
+			.Where(item => !item.Key.IsRead)
+			.OrderByDescending(e => e.Key.Sent)
+			.ToList();
 	}
 }
