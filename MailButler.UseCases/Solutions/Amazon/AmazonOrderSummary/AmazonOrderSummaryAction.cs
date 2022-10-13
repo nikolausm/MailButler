@@ -102,7 +102,7 @@ public sealed class AmazonOrderSummaryAction
 			return;
 		}
 
-		if (getAmazonOrderEmailsResponse.Result.Count(email => !email.Key.IsRead) == 0)
+		if (!request.EvenIfAllEmailsAreRead && getAmazonOrderEmailsResponse.Result.Count(email => !email.Key.IsRead) == 0)
 		{
 			_logger.LogInformation("No unread amazon order emails found");
 			return;

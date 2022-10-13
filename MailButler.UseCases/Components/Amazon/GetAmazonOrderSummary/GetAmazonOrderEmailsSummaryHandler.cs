@@ -98,15 +98,35 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 			htmlBody.AppendLine("<p>");
 			foreach (var sellerEmail in sellerEmails.GroupBy(e => e.Key.Subject))
 			{
-				htmlBody.AppendLine($"<h3>{sellerEmail.Key} <i>({sellerEmail.Sum(ite => ite.Value.Count)})</i></h3>");
-				htmlBody.AppendLine("<ol>");
-				htmlBody.AppendJoin(
-					"\r\n",
-					sellerEmail
+				htmlBody.AppendLine("<h3>");
+				htmlBody.Append($"{sellerEmail.Key}");
+				if (sellerEmail.Count() > 1)
+				{
+					htmlBody.AppendLine($" <i>({sellerEmail.Sum(ite => ite.Value.Count)})</i>");
+				}
+
+				htmlBody.AppendLine($"</h3>");
+				if (sellerEmail.Count() > 1)
+				{
+					htmlBody.AppendLine("<ol>");
+					htmlBody.AppendJoin(
+						"\r\n",
+						sellerEmail
+							.SelectMany(item => item.Value)
+							.Select(item => $" <li>{item}</li>")
+					);
+					htmlBody.AppendLine("</ol>");
+					continue;
+				}
+
+				if (sellerEmail.Count() == 1)
+				{
+					htmlBody.AppendLine(sellerEmail
 						.SelectMany(item => item.Value)
 						.Select(item => $" <li>{item}</li>")
-				);
-				htmlBody.AppendLine("</ol>");
+						.Single()
+					);
+				}
 			}
 
 			htmlBody.AppendLine("</p>");

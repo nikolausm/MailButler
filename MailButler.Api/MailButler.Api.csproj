@@ -5,6 +5,8 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>7444ed2c-1530-4d27-ba50-f2268669fb12</UserSecretsId>
+        <AssemblyVersion>1.0.0.*</AssemblyVersion>
+        <FileVersion>1.0.0.*</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -12,13 +14,13 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj"/>
-        <ProjectReference Include="..\MailButler.UseCases\MailButler.UseCases.csproj"/>
+        <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj" />
+        <ProjectReference Include="..\MailButler.UseCases\MailButler.UseCases.csproj" />
     </ItemGroup>
 
 </Project>
