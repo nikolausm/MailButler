@@ -36,6 +36,8 @@ public class ActionsController : ControllerBase
 						.ExecuteAsync(
 							new AmazonOrderSummaryRequest
 							{
+								MarkEmailAsRead = false,
+								EvenIfAllEmailsAreRead = true,
 								SmtpAccount = smtpAccount
 							}, cancellationToken
 						);

@@ -31,6 +31,8 @@ public sealed class AmazonOrderSummaryAction
 
 	public async Task ExecuteAsync(AmazonOrderSummaryRequest request, CancellationToken cancellationToken)
 	{
+		#region check connection
+
 		var checkConnectionsResponse = await _mediator.Send(
 			new CheckConnectionsRequest
 			{
@@ -43,6 +45,9 @@ public sealed class AmazonOrderSummaryAction
 			_logger.LogError("Failed to get connections {Message}", checkConnectionsResponse.Message);
 			return;
 		}
+		#endregion
+
+		#region Fetch emails from account
 
 		List<Task<(List<Email> Emails, Account Account)>> items = checkConnectionsResponse
 			.Result
@@ -53,11 +58,13 @@ public sealed class AmazonOrderSummaryAction
 						(await _mediator.Send(
 								new FetchEmailsRequest
 								{
+									StartDate = request.StartDate,
 									Account = account
 								}, cancellationToken
 							)
 						).Result, account
-					)
+					),
+					cancellationToken
 				)
 			).ToList();
 
@@ -74,8 +81,9 @@ public sealed class AmazonOrderSummaryAction
 				);
 			}
 		);
+		#endregion
 
-
+		#region filter emails
 		var emailMatchAgainstRuleResponse = await _mediator.Send(
 			new EmailsMatchAgainstRuleRequest
 			{
@@ -90,7 +98,14 @@ public sealed class AmazonOrderSummaryAction
 					"\\d{3}-\\d{7}-\\d{7}"
 				)
 			}, cancellationToken);
+		if (emailMatchAgainstRuleResponse.Status == Status.Failed)
+		{
+			_logger.LogError("Failed to get amazon order emails: {Message}", emailMatchAgainstRuleResponse.Message);
+			return;
+		}
+		#endregion
 
+		#region generate amazon order ids
 		var getAmazonOrderEmailsResponse = await _mediator.Send(new GetAmazonOrderEmailsRequest
 		{
 			Emails = emailMatchAgainstRuleResponse.Result
@@ -102,12 +117,15 @@ public sealed class AmazonOrderSummaryAction
 			return;
 		}
 
-		if (!request.EvenIfAllEmailsAreRead && getAmazonOrderEmailsResponse.Result.Count(email => !email.Key.IsRead) == 0)
+		if (!request.EvenIfAllEmailsAreRead &&
+		    getAmazonOrderEmailsResponse.Result.Count(email => !email.Key.IsRead) == 0)
 		{
 			_logger.LogInformation("No unread amazon order emails found");
 			return;
 		}
-
+		#endregion
+		
+		#region generate amazon order summary
 		var getSummaryEmailForAmazon = await _mediator.Send(
 			new GetAmazonOrderEmailsSummaryRequest
 			{
@@ -123,7 +141,9 @@ public sealed class AmazonOrderSummaryAction
 			);
 			return;
 		}
+		#endregion
 
+		#region send summary email
 		var sendEmailResponse = await _mediator.Send(
 			new SendEmailRequest
 			{
@@ -137,7 +157,16 @@ public sealed class AmazonOrderSummaryAction
 			_logger.LogError("Failed to send summary email: {Message}", sendEmailResponse.Message);
 			return;
 		}
+		#endregion
+		
+		if (request.MarkEmailAsRead)
+			await MarkEmailsAsRead(getAmazonOrderEmailsResponse);
 
+		_logger.LogInformation("Result: {Result}", getSummaryEmailForAmazon.Result);
+	}
+
+	private async Task MarkEmailsAsRead(GetAmazonOrderEmailsResponse getAmazonOrderEmailsResponse)
+	{
 		foreach (var account in getAmazonOrderEmailsResponse.Result.Keys.Select(d => d.AccountId).Distinct())
 		{
 			var markAsReadResponse = await _mediator.Send(
@@ -151,8 +180,5 @@ public sealed class AmazonOrderSummaryAction
 			if (markAsReadResponse.Status == Status.Failed)
 				_logger.LogError("Failed to mark emails as read: {Message}", markAsReadResponse.Message);
 		}
-
-
-		_logger.LogInformation("Result: {Result}", getSummaryEmailForAmazon.Result);
 	}
 }

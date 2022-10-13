@@ -8,13 +8,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 var configuration = new ConfigurationBuilder()
 	.AddJsonFile("appsettings.json")
 	.AddJsonFile("appsettings." + Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") + ".json",
 		true)
-	.AddUserSecrets<MailButlerOptions>()
 	.AddEnvironmentVariables()
+	.AddUserSecrets<MailButlerOptions>()
 	.Build();
 
 var services = new ServiceCollection();
@@ -43,8 +44,8 @@ var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLo
 var smtpAccount = scope.ServiceProvider.GetRequiredService<IList<Account>>()
 	.First(r => r.Name.Contains("iCloud", StringComparison.InvariantCultureIgnoreCase));
 var tokenSource = new CancellationTokenSource();
-
-
+var options = scope.ServiceProvider.GetRequiredService<IOptions<MailButlerOptions>>().Value;
+var startDate = DateTime.Now;
 using (var _ = logger.BeginScope("AmazonOrderSummaryAction =>"))
 {
 	logger.LogInformation("Starting");
@@ -52,8 +53,24 @@ using (var _ = logger.BeginScope("AmazonOrderSummaryAction =>"))
 		.ExecuteAsync(
 			new AmazonOrderSummaryRequest
 			{
-				SmtpAccount = smtpAccount
+				SmtpAccount = options.AmazonOrderSummaryAction.SmtpAccount,
+				MarkEmailAsRead = options.AmazonOrderSummaryAction.MarkEmailAsRead,
+				EvenIfAllEmailsAreRead = options.AmazonOrderSummaryAction.EvenIfAllEmailsAreRead,
+				StartDate = options.AmazonOrderSummaryAction.StartDate
 			}, tokenSource.Token
 		);
 	logger.LogInformation("Finished run for {Date:yyyy-MM-dd}", DateTime.Today);
+	
+	#region Update Runtime
+	dynamic? jsonObj = JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(
+		File.ReadAllText("appsettings.json")
+	);
+	if (jsonObj is null)
+	{
+		throw new Exception("Failed to read appsettings.json");
+	}
+	jsonObj["MailButler"]["AmazonOrderSummaryAction"]["StartDate"] = startDate.ToString("s");
+	File.WriteAllText("appsettings.json", JsonConvert.SerializeObject(jsonObj, Formatting.Indented));
+	#endregion
 }
+

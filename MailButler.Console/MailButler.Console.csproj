@@ -13,23 +13,23 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1"/>
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0"/>
-        <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+        <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MailButler.Core\MailButler.Core.csproj"/>
-        <ProjectReference Include="..\MailButler.UseCases\MailButler.UseCases.csproj"/>
+        <ProjectReference Include="..\MailButler.Core\MailButler.Core.csproj" />
+        <ProjectReference Include="..\MailButler.UseCases\MailButler.UseCases.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <None Update="appsettings.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
