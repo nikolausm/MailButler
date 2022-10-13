@@ -56,7 +56,8 @@ using (var _ = logger.BeginScope("AmazonOrderSummaryAction =>"))
 				SmtpAccount = options.AmazonOrderSummaryAction.SmtpAccount,
 				MarkEmailAsRead = options.AmazonOrderSummaryAction.MarkEmailAsRead,
 				EvenIfAllEmailsAreRead = options.AmazonOrderSummaryAction.EvenIfAllEmailsAreRead,
-				StartDate = options.AmazonOrderSummaryAction.StartDate
+				DateTime = options.AmazonOrderSummaryAction.LastRun,
+				DaysToCheck = options.AmazonOrderSummaryAction.DaysToCheck
 			}, tokenSource.Token
 		);
 	logger.LogInformation("Finished run for {Date:yyyy-MM-dd}", DateTime.Today);
@@ -69,7 +70,7 @@ using (var _ = logger.BeginScope("AmazonOrderSummaryAction =>"))
 	{
 		throw new Exception("Failed to read appsettings.json");
 	}
-	jsonObj["MailButler"]["AmazonOrderSummaryAction"]["StartDate"] = startDate.ToString("s");
+	jsonObj["MailButler"]["AmazonOrderSummaryAction"]["LastRun"] = startDate.ToString("s");
 	File.WriteAllText("appsettings.json", JsonConvert.SerializeObject(jsonObj, Formatting.Indented));
 	#endregion
 }
