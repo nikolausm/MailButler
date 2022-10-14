@@ -243,7 +243,7 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 			textBody.AppendLine($"{order} ({accounts[orderEmails.First().Key.AccountId].Name}):");
 
 			foreach (var email in orderEmails)
-				lines.Add($"- {(email.Key.IsRead ? "*" : "")}{email.Key.Sent:yyyy-MM-dd}: {email.Key.Subject}");
+				lines.Add($"- {(email.Key.IsRead ? "" : "*")}{email.Key.Sent:yyyy-MM-dd}: {email.Key.Subject}");
 
 			textBody.AppendJoin("\r\n", lines);
 			textBody.AppendLine();

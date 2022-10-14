@@ -38,7 +38,9 @@ public class ActionsController : ControllerBase
 							{
 								MarkEmailAsRead = false,
 								EvenIfAllEmailsAreRead = true,
-								SmtpAccount = smtpAccount
+								SmtpAccount = smtpAccount,
+								DateTime = DateTime.Now.AddDays(-7),
+								DaysToCheck = 7
 							}, cancellationToken
 						);
 
