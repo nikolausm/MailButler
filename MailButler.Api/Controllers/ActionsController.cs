@@ -1,6 +1,8 @@
+using MailButler.Api.Dtos;
 using MailButler.Dtos;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using Microsoft.AspNetCore.Mvc;
+using Action = MailButler.Api.Dtos.Action;
 
 namespace MailButler.Api.Controllers;
 
@@ -9,42 +11,31 @@ namespace MailButler.Api.Controllers;
 public class ActionsController : ControllerBase
 {
 	private readonly ILogger<ActionsController> _logger;
-	private readonly IServiceScope _scope;
+	private readonly BackgroundServiceQueue _backgroundServiceQueue;
 
-	public ActionsController(ILogger<ActionsController> logger, IServiceScopeFactory scope)
+	public ActionsController(
+		ILogger<ActionsController> logger,
+		BackgroundServiceQueue backgroundServiceQueue
+	)
 	{
 		_logger = logger;
-		_scope = scope.CreateScope();
+		_backgroundServiceQueue = backgroundServiceQueue;
 	}
 
 	[HttpGet]
 	[ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
-	public async Task<IActionResult> GetAsync(Actions action, CancellationToken cancellationToken)
+	public IActionResult GetAsync(Action action, CancellationToken cancellationToken)
 	{
 		IActionResult result;
 		using (var _ = _logger.BeginScope($"{action.ToString()} =>"))
 		{
 			switch (action)
 			{
-				case Actions.AmazonOrderSummary:
-					var smtpAccount = _scope.ServiceProvider.GetRequiredService<IList<Account>>()
-						.First(r => r.Name.Contains("iCloud", StringComparison.InvariantCultureIgnoreCase));
+				case Action.AmazonOrderSummary:
 					_logger.LogInformation("Starting");
-
-					await _scope.ServiceProvider.GetRequiredService<AmazonOrderSummaryAction>()
-						.ExecuteAsync(
-							new AmazonOrderSummaryRequest
-							{
-								MarkEmailAsRead = false,
-								EvenIfAllEmailsAreRead = true,
-								SmtpAccount = smtpAccount,
-								DateTime = DateTime.Now.AddDays(-7),
-								DaysToCheck = 7
-							}, cancellationToken
-						);
-
-					result = Ok();
+					_backgroundServiceQueue.Enqueue(action);
+					result = Ok("Started");
 					break;
 				default:
 					result = BadRequest($"Unknown action {action}");

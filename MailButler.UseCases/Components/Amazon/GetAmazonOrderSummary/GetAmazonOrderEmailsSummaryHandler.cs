@@ -186,7 +186,9 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 		if (!ordersEmails.Any())
 			return;
 
-		htmlBody.AppendLine($"<h2>Orders:</h2>");
+		bool titleWritten = false;
+		
+		
 		foreach (var order in ordersEmails)
 		{
 			var orderEmails = emailsWithOrders
@@ -199,6 +201,12 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 				continue;
 			}
 
+			if (!titleWritten)
+			{
+				htmlBody.AppendLine($"<h2>Orders: <i>{ordersEmails.Count}</i></h2>");
+				titleWritten = true;
+			}
+			
 			htmlBody.AppendLine($"<h3>{order} <i>({accounts[orderEmails.First().Key.AccountId].Name})</i>:</h3>");
 			if (orderEmails.Count > 1)
 			{
@@ -239,9 +247,8 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 	{
 		if (!emailsWithOrders.Any())
 			return;
-
-		textBody.AppendLine("Orders: ");
-
+		
+		bool titleWritten = false;
 		foreach (var order in emailsWithOrders
 			         .Where(item => !IsAmazonSellerEmail(item))
 			         .OrderByDescending(e => e.Key.Sent)
@@ -255,6 +262,17 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 				.OrderByDescending(e => e.Key.Sent)
 				.ToList();
 
+			if (orderEmails.All(e => e.Key.IsRead))
+			{
+				continue;
+			}
+
+			if (!titleWritten)
+			{
+				textBody.AppendLine("Orders: ");
+				titleWritten = true;
+			}
+			
 			textBody.AppendLine($"{order} ({accounts[orderEmails.First().Key.AccountId].Name}):");
 
 			foreach (var email in orderEmails)

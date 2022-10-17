@@ -1,9 +1,11 @@
+using System.Reflection;
 using System.Text.Json.Serialization;
 using MailButler.Api;
 using MailButler.Dtos;
 using MailButler.UseCases.Components.Extensions.DependencyInjection;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,12 +34,23 @@ builder.Services.AddLogging(configurationBuilder =>
 	});
 });
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+	AssemblyName assemblyName = Assembly.GetEntryAssembly()!.GetName();
+	
+	options.SwaggerDoc("v1", new OpenApiInfo
+	{
+		Version = assemblyName.Version!.ToString(3),
+		Title = assemblyName.Name,
+	});
+});
 builder.Services.Configure<MailButlerOptions>(configuration.GetSection("MailButler"));
 builder.Services.AddTransient<IList<Account>>(
 	sp => sp.GetRequiredService<IOptions<MailButlerOptions>>().Value.Accounts
 );
 builder.Services.AddTransient<AmazonOrderSummaryAction>();
+builder.Services.AddHostedService<BackgroundServiceWorker>();
+builder.Services.AddSingleton<BackgroundServiceQueue>();
 
 var app = builder.Build();
 
