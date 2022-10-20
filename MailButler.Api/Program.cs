@@ -13,8 +13,8 @@ var configuration = new ConfigurationBuilder()
 	.AddJsonFile("appsettings.json")
 	.AddJsonFile("appsettings." + Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") + ".json",
 		true)
-	.AddUserSecrets<MailButlerOptions>()
 	.AddEnvironmentVariables()
+	.AddUserSecrets<MailButlerOptions>()
 	.Build();
 
 // Add services to the container.
@@ -36,12 +36,12 @@ builder.Services.AddLogging(configurationBuilder =>
 
 builder.Services.AddSwaggerGen(options =>
 {
-	AssemblyName assemblyName = Assembly.GetEntryAssembly()!.GetName();
-	
+	var assemblyName = Assembly.GetEntryAssembly()!.GetName();
+
 	options.SwaggerDoc("v1", new OpenApiInfo
 	{
 		Version = assemblyName.Version!.ToString(3),
-		Title = assemblyName.Name,
+		Title = assemblyName.Name
 	});
 });
 builder.Services.Configure<MailButlerOptions>(configuration.GetSection("MailButler"));
@@ -49,8 +49,10 @@ builder.Services.AddTransient<IList<Account>>(
 	sp => sp.GetRequiredService<IOptions<MailButlerOptions>>().Value.Accounts
 );
 builder.Services.AddTransient<AmazonOrderSummaryAction>();
-builder.Services.AddHostedService<BackgroundServiceWorker>();
 builder.Services.AddSingleton<BackgroundServiceQueue>();
+builder.Services.AddSingleton<BackgroundServiceWorker>();
+builder.Services.AddHostedService(e => e.GetRequiredService<BackgroundServiceWorker>());
+
 
 var app = builder.Build();
 

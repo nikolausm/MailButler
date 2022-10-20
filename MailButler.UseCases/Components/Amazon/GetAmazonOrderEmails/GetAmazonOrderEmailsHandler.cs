@@ -46,7 +46,7 @@ public sealed class
 			if (_logger.IsEnabled(LogLevel.Error))
 				_logger.LogError(
 					exception,
-					"Failed to process Amazon Order Emails from {Request}",
+					"Failed to process Amazon Order OrdersEmailsIfAnyUnread from {Request}",
 					request.ToDictionary()
 				);
 

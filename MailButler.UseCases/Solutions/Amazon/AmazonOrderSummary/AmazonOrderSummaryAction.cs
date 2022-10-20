@@ -1,3 +1,4 @@
+using Extensions.Dictionary;
 using MailButler.Dtos;
 using MailButler.MailRules.Filter;
 using MailButler.UseCases.Components.Amazon.GetAmazonOrderEmails;
@@ -172,7 +173,7 @@ public sealed class AmazonOrderSummaryAction
 		if (request.MarkEmailAsRead)
 			await MarkEmailsAsRead(getAmazonOrderEmailsResponse);
 
-		_logger.LogInformation("Result: {Result}", getSummaryEmailForAmazon.Result);
+		_logger.LogInformation("Result: {Result}", getSummaryEmailForAmazon.Result.ToDictionary());
 	}
 
 	private async Task MarkEmailsAsRead(GetAmazonOrderEmailsResponse getAmazonOrderEmailsResponse)

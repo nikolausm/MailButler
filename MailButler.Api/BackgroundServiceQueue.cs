@@ -1,5 +1,7 @@
+using Action = MailButler.Api.Dtos.Action;
+
 namespace MailButler.Api;
 
-public sealed class BackgroundServiceQueue : Queue<MailButler.Api.Dtos.Action>
+public sealed class BackgroundServiceQueue : Queue<Action>
 {
 }

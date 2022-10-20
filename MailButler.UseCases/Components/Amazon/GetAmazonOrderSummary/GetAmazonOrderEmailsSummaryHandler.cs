@@ -1,5 +1,6 @@
 using System.Text;
 using MailButler.Dtos;
+using MailButler.UseCases.Components.Amazon.GetAmazonOrderSummary.Extensions;
 using MediatR;
 
 namespace MailButler.UseCases.Components.Amazon.GetAmazonOrderSummary;
@@ -72,11 +73,11 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 			TextBody = TextBody(emailsWithOrders),
 			HtmlBody = HtmlBody(emailsWithOrders),
 			Subject =
-				$"Summary of Amazon Orders Emails since: {emailsWithOrders.Min(email => email.Key.Sent):yyyy-MM-dd}"
+				$"Summary of Amazon Orders OrdersEmailsIfAnyUnread since: {emailsWithOrders.Min(email => email.Key.Sent):yyyy-MM-dd}"
 		};
 	}
 
-	public string HtmlLogo()
+	private string HtmlLogo()
 	{
 		StringBuilder htmlBody = new();
 		htmlBody.AppendLine("<center id='logo'>");
@@ -121,93 +122,79 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 
 		var accounts = _accounts.ToDictionary(e => e.Id, account => account);
 
-		SellerEmailsHtmlSummary(emailsWithOrders, htmlBody);
-		OrderEmailsHtmlSummary(emailsWithOrders, htmlBody, accounts);
+		AppendSellerEmailsHtmlSummary(emailsWithOrders, htmlBody);
+		AppendOrderEmailsHtmlSummary(emailsWithOrders, htmlBody, accounts);
 
 		htmlBody.AppendLine($"<!-- Id: {EmailId} -->");
 		return htmlBody.ToString();
 	}
 
-	private static void SellerEmailsHtmlSummary(Dictionary<Email, List<string>> emailsWithOrders,
-		StringBuilder htmlBody)
+	private static void AppendSellerEmailsHtmlSummary(
+		Dictionary<Email, List<string>> emailsWithOrders,
+		StringBuilder htmlBody
+	)
 	{
-		var sellerEmails = UnreadSellerEmails(emailsWithOrders);
-		if (sellerEmails.All(e => e.Key.IsRead))
+		var sellerEmails = emailsWithOrders.UnreadSellerEmails();
+		if (!sellerEmails.Any())
 			return;
 
-		int ordersInSellerEmails = sellerEmails.Sum(ite => ite.Value.Count);
-		htmlBody.AppendLine($"<h2>Sold on Amazon: <i>{ordersInSellerEmails}</i></h2>");
-		foreach (var sellerEmail in sellerEmails.GroupBy(e => e.Key.Subject))
+		htmlBody.AppendLine("<h2>Sold on Amazon</h2>");
+		foreach (var sellerEmail in sellerEmails
+			         .GroupBy(e => e.Key.Subject))
 		{
 			htmlBody.AppendLine("<h3>");
 			htmlBody.Append($"{sellerEmail.Key}");
-			if (sellerEmail.Count() > 1)
-			{
-				htmlBody.AppendLine($" <i>({sellerEmail.Sum(ite => ite.Value.Count)})</i>");
-			}
-
 			htmlBody.AppendLine($"</h3>");
 
 			if (sellerEmail.Count() > 1)
 			{
 				htmlBody.AppendLine("<ol>");
-				htmlBody.AppendJoin(
-					"\r\n",
-					sellerEmail
-						.SelectMany(item => item.Value)
-						.Select(item => $" <li>{item}</li>")
-				);
-				htmlBody.AppendLine("</ol>");
 			}
 
-			if (sellerEmail.Count() == 1)
+			htmlBody.AppendJoin(
+				"\r\n",
+				sellerEmail
+					.SelectMany(item => item.Value.Select(order => (item.Key.Sent, order)))
+					.Select(item => $" <li>{item.Sent:yyyy-MM-dd}: {item.order}</li>")
+			);
+			
+			if (sellerEmail.Count() > 1)
 			{
-				htmlBody.AppendLine(sellerEmail
-					.SelectMany(item => item.Value)
-					.Select(item => $" <li>{item}</li>")
-					.Single()
-				);
+				htmlBody.AppendLine("</ol>");
 			}
 		}
 
 		htmlBody.AppendLine();
 	}
 
-	private static void OrderEmailsHtmlSummary(Dictionary<Email, List<string>> emailsWithOrders, StringBuilder htmlBody,
-		Dictionary<Guid, Account> accounts)
+	private static void AppendOrderEmailsHtmlSummary(
+		Dictionary<Email, List<string>> emailsWithOrders,
+		StringBuilder htmlBody,
+		Dictionary<Guid, Account> accounts
+	)
 	{
-		List<string> ordersEmails = emailsWithOrders
-			.Where(item => !IsAmazonSellerEmail(item))
-			.OrderByDescending(e => e.Key.Sent)
-			.SelectMany(e => e.Value)
-			.Distinct()
-			.ToList();
+		List<string> ordersEmails = emailsWithOrders.Orders().ToList();
 
 		if (!ordersEmails.Any())
 			return;
 
 		bool titleWritten = false;
-		
-		
+
 		foreach (var order in ordersEmails)
 		{
-			var orderEmails = emailsWithOrders
-				.Where(e => e.Value.Contains(order))
-				.OrderByDescending(e => e.Key.Sent)
-				.ToList();
-
-			if (orderEmails.All(e => e.Key.IsRead))
+			Dictionary<Email, List<string>> orderEmails = emailsWithOrders.OrdersEmailsIfAnyUnread(order);
+			if (!orderEmails.Any())
 			{
 				continue;
 			}
 
 			if (!titleWritten)
 			{
-				htmlBody.AppendLine($"<h2>Orders: <i>{ordersEmails.Count}</i></h2>");
+				htmlBody.AppendLine($"<h2>Orders: {emailsWithOrders.CountOrdersWithUnreadEmails()}</h2>");
 				titleWritten = true;
 			}
-			
-			htmlBody.AppendLine($"<h3>{order} <i>({accounts[orderEmails.First().Key.AccountId].Name})</i>:</h3>");
+
+			htmlBody.AppendLine($"<h3>{order} <span>({accounts[orderEmails.First().Key.AccountId].Name})</span>:</h3>");
 			if (orderEmails.Count > 1)
 			{
 				htmlBody.AppendLine("<ol>");
@@ -222,7 +209,8 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 							$"<li>{(email.Key.IsRead ? "" : "*")}{email.Key.Sent:yyyy-MM-dd}: {email.Key.Subject}</li>"
 					)
 			);
-			if (orderEmails.Count >= 1)
+			
+			if (orderEmails.Count > 1)
 			{
 				htmlBody.AppendLine("</ol>");
 			}
@@ -234,35 +222,29 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 		StringBuilder textBody = new();
 		var accounts = _accounts.ToDictionary(e => e.Id, account => account);
 
-		SellerEmailsTextSummary(emailsWithOrders, textBody);
-		OrderEmailsTextSummary(emailsWithOrders, textBody, accounts);
+		AppendSellerEmailsTextSummary(emailsWithOrders, textBody);
+		AppendOrderEmailsTextSummary(emailsWithOrders, textBody, accounts);
 
 		textBody.AppendLine("r\n\r\n\r\n\r\n");
 		textBody.AppendLine($"Id: {EmailId}");
 		return textBody.ToString();
 	}
 
-	private static void OrderEmailsTextSummary(Dictionary<Email, List<string>> emailsWithOrders, StringBuilder textBody,
-		Dictionary<Guid, Account> accounts)
+	private static void AppendOrderEmailsTextSummary(
+		Dictionary<Email, List<string>> emailsWithOrders,
+		StringBuilder textBody,
+		Dictionary<Guid, Account> accounts
+	)
 	{
 		if (!emailsWithOrders.Any())
 			return;
-		
+
 		bool titleWritten = false;
-		foreach (var order in emailsWithOrders
-			         .Where(item => !IsAmazonSellerEmail(item))
-			         .OrderByDescending(e => e.Key.Sent)
-			         .SelectMany(e => e.Value)
-			         .Distinct()
-		        )
+		foreach (var order in emailsWithOrders.Orders())
 		{
 			HashSet<string> lines = new();
-			var orderEmails = emailsWithOrders
-				.Where(e => e.Value.Contains(order))
-				.OrderByDescending(e => e.Key.Sent)
-				.ToList();
-
-			if (orderEmails.All(e => e.Key.IsRead))
+			var orderEmails = emailsWithOrders.OrdersEmailsIfAnyUnread(order);
+			if (!orderEmails.Any())
 			{
 				continue;
 			}
@@ -272,7 +254,7 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 				textBody.AppendLine("Orders: ");
 				titleWritten = true;
 			}
-			
+
 			textBody.AppendLine($"{order} ({accounts[orderEmails.First().Key.AccountId].Name}):");
 
 			foreach (var email in orderEmails)
@@ -283,10 +265,12 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 		}
 	}
 
-	private static void SellerEmailsTextSummary(Dictionary<Email, List<string>> emailsWithOrders,
-		StringBuilder textBody)
+	private static void AppendSellerEmailsTextSummary(
+		Dictionary<Email, List<string>> emailsWithOrders,
+		StringBuilder textBody
+	)
 	{
-		var sellerEmails = UnreadSellerEmails(emailsWithOrders);
+		var sellerEmails = emailsWithOrders.UnreadSellerEmails();
 		if (sellerEmails.Any(e => !e.Key.IsRead))
 		{
 			var ordersInSellerEmails = sellerEmails.Sum(ite => ite.Value.Count);
@@ -304,20 +288,5 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 
 			textBody.AppendLine();
 		}
-	}
-
-	private static bool IsAmazonSellerEmail(KeyValuePair<Email, List<string>> email)
-	{
-		return email.Key.Sender.Address == "donotreply@amazon.com";
-	}
-
-	private static List<KeyValuePair<Email, List<string>>> UnreadSellerEmails(
-		Dictionary<Email, List<string>> emailsWithOrders)
-	{
-		return emailsWithOrders
-			.Where(item => IsAmazonSellerEmail(item))
-			.Where(item => !item.Key.IsRead)
-			.OrderByDescending(e => e.Key.Sent)
-			.ToList();
 	}
 }

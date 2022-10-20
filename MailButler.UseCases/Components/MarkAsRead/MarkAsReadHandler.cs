@@ -25,7 +25,7 @@ public sealed class MarkAsReadHandler : IRequestHandler<MarkAsReadRequest, MarkA
 
 			await client.Inbox.AddFlagsAsync(
 				request.Emails.Where(email => !email.IsRead)
-					.Select(email => new UniqueId(email.Id.Id, email.Id.Validity))
+					.Select(email => new UniqueId(email.Id.Validity, email.Id.Id))
 					.ToList(),
 				MessageFlags.Seen,
 				true,

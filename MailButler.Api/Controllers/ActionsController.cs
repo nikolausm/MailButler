@@ -1,6 +1,4 @@
-using MailButler.Api.Dtos;
 using MailButler.Dtos;
-using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using Microsoft.AspNetCore.Mvc;
 using Action = MailButler.Api.Dtos.Action;
 
@@ -10,16 +8,19 @@ namespace MailButler.Api.Controllers;
 [Route("[controller]")]
 public class ActionsController : ControllerBase
 {
-	private readonly ILogger<ActionsController> _logger;
 	private readonly BackgroundServiceQueue _backgroundServiceQueue;
+	private readonly BackgroundServiceWorker _backgroundServiceWorker;
+	private readonly ILogger<ActionsController> _logger;
 
 	public ActionsController(
 		ILogger<ActionsController> logger,
-		BackgroundServiceQueue backgroundServiceQueue
+		BackgroundServiceQueue backgroundServiceQueue,
+		BackgroundServiceWorker backgroundServiceWorker
 	)
 	{
 		_logger = logger;
 		_backgroundServiceQueue = backgroundServiceQueue;
+		_backgroundServiceWorker = backgroundServiceWorker;
 	}
 
 	[HttpGet]
@@ -32,6 +33,11 @@ public class ActionsController : ControllerBase
 		{
 			switch (action)
 			{
+				case Action.CurrentAction:
+					return Ok(_backgroundServiceWorker.Started == DateTime.MinValue
+						? "No Job running"
+						: $"Currently running: {_backgroundServiceWorker.Action} {(DateTime.Now - _backgroundServiceWorker.Started).TotalSeconds} seconds");
+
 				case Action.AmazonOrderSummary:
 					_logger.LogInformation("Starting");
 					_backgroundServiceQueue.Enqueue(action);

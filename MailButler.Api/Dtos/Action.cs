@@ -4,9 +4,10 @@ namespace MailButler.Api.Dtos;
 
 public enum Action
 {
-	[Display(Name = "No Action")]
-	Unknown,
+	[Display(Name = "No Action")] Unknown,
 
 	[Display(Name = "Amazon Order Summary")]
-	AmazonOrderSummary
+	AmazonOrderSummary,
+
+	[Display(Name = "Current Action")] CurrentAction
 }

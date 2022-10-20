@@ -12,7 +12,7 @@ public static class MailKitExtensions
 		return new Email
 		{
 			AccountId = accountId,
-			Id = new Dtos.UniqueId(id.Id, id.Validity),
+			Id = new Dtos.UniqueId(id.Validity, id.Id),
 			Sender = new MailBoxAddress
 			{
 				Name = message.From.Single().Name,

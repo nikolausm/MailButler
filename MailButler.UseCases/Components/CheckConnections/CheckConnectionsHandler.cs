@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using Extensions.Dictionary;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
@@ -38,11 +39,22 @@ public sealed class CheckConnectionsHandler : IRequestHandler<CheckConnectionsRe
 			catch (Exception exception)
 			{
 				if (_logger.IsEnabled(LogLevel.Warning))
+				{
+					var asDictionary = account.ToDictionary();
+					
+					if (asDictionary.ContainsKey(nameof(Account.Password)))
+						asDictionary[nameof(Account.Password)] = "*******";
+
+					if (asDictionary.ContainsKey(nameof(Account.ClientSecret)))
+						asDictionary[nameof(Account.ClientSecret)] = "*******";
+
 					_logger.LogWarning(
 						exception,
 						"Failed to connect to account {Account}",
-						account.ToDictionary()
+						asDictionary
 					);
+				}
+
 
 				connectionStatuses.Add(account, new ConnectionStatus { Works = false, Error = exception.Message });
 			}
