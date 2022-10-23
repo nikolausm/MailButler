@@ -6,5 +6,6 @@ public enum FilterType
 	SimpleString,
 	Contains,
 	EndsWith,
-	StartsWith
+	StartsWith,
+	Equals
 }

@@ -15,18 +15,15 @@ namespace MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 
 public sealed class AmazonOrderSummaryAction
 {
-	private readonly IList<Account> _accounts;
 	private readonly ILogger<AmazonOrderSummaryAction> _logger;
 	private readonly IMediator _mediator;
 
 	public AmazonOrderSummaryAction(
 		IMediator mediator,
-		IList<Account> accounts,
 		ILogger<AmazonOrderSummaryAction> logger
 	)
 	{
 		_mediator = mediator;
-		_accounts = accounts;
 		_logger = logger;
 	}
 
@@ -37,7 +34,7 @@ public sealed class AmazonOrderSummaryAction
 		var checkConnectionsResponse = await _mediator.Send(
 			new CheckConnectionsRequest
 			{
-				Accounts = _accounts.ToList()
+				Accounts = request.Accounts
 			}, cancellationToken
 		);
 
@@ -112,10 +109,12 @@ public sealed class AmazonOrderSummaryAction
 
 		#region generate amazon order ids
 
-		var getAmazonOrderEmailsResponse = await _mediator.Send(new GetAmazonOrderEmailsRequest
-		{
-			Emails = emailMatchAgainstRuleResponse.Result
-		}, cancellationToken);
+		var getAmazonOrderEmailsResponse = await _mediator.Send(
+			new GetAmazonOrderEmailsRequest
+			{
+				Emails = emailMatchAgainstRuleResponse.Result,
+			}, cancellationToken
+		);
 
 		if (getAmazonOrderEmailsResponse.Status == Status.Failed)
 		{
@@ -137,7 +136,8 @@ public sealed class AmazonOrderSummaryAction
 		var getSummaryEmailForAmazon = await _mediator.Send(
 			new GetAmazonOrderEmailsSummaryRequest
 			{
-				EmailsWithOrders = getAmazonOrderEmailsResponse.Result
+				EmailsWithOrders = getAmazonOrderEmailsResponse.Result,
+				Accounts = request.Accounts
 			}, cancellationToken
 		);
 
@@ -171,19 +171,19 @@ public sealed class AmazonOrderSummaryAction
 		#endregion
 
 		if (request.MarkEmailAsRead)
-			await MarkEmailsAsRead(getAmazonOrderEmailsResponse);
+			await MarkEmailsAsRead(getAmazonOrderEmailsResponse, request);
 
 		_logger.LogInformation("Result: {Result}", getSummaryEmailForAmazon.Result.ToDictionary());
 	}
 
-	private async Task MarkEmailsAsRead(GetAmazonOrderEmailsResponse getAmazonOrderEmailsResponse)
+	private async Task MarkEmailsAsRead(GetAmazonOrderEmailsResponse getAmazonOrderEmailsResponse, AmazonOrderSummaryRequest request)
 	{
-		foreach (var account in getAmazonOrderEmailsResponse.Result.Keys.Select(d => d.AccountId).Distinct())
+		foreach (var accountId in getAmazonOrderEmailsResponse.Result.Keys.Select(d => d.AccountId).Distinct())
 		{
 			var markAsReadResponse = await _mediator.Send(
 				new MarkAsReadRequest
 				{
-					Account = _accounts.Single(a => a.Id == account),
+					Account = request.Accounts.Single(a => a.Id == accountId),
 					Emails = getAmazonOrderEmailsResponse.Result.Keys.ToList()
 				}
 			);

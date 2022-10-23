@@ -26,8 +26,4 @@
         <ProjectReference Include="..\MailButler.MailRules\MailButler.MailRules.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Components" />
-    </ItemGroup>
-
 </Project>

@@ -1,4 +1,5 @@
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
+using MailButler.UseCases.Solutions.ForwardToGetMyInvoices;
 using Microsoft.Extensions.Options;
 using Action = MailButler.Api.Dtos.Action;
 
@@ -48,31 +49,52 @@ public sealed class BackgroundServiceWorker : BackgroundService
 			}
 
 			using var scope = _factory.CreateScope();
+			_logger.LogInformation("Starting {Action}", type);
+			Action = type;
+			Started = DateTime.Now;
 
 			switch (type)
 			{
 				case Action.AmazonOrderSummary:
-					var options = _mailButlerOptions.Value.AmazonOrderSummaryAction;
-					_logger.LogInformation("Starting {Action}", type);
-					Action = type;
-					Started = DateTime.Now;
+					var amazonOrderSummaryActionOptions = _mailButlerOptions.Value.AmazonOrderSummaryAction;
 					await scope.ServiceProvider
 						.GetRequiredService<AmazonOrderSummaryAction>()
 						.ExecuteAsync(
 							new AmazonOrderSummaryRequest
 							{
-								MarkEmailAsRead = options.MarkEmailAsRead,
-								EvenIfAllEmailsAreRead = options.EvenIfAllEmailsAreRead,
-								SmtpAccount = options.SmtpAccount,
+								MarkEmailAsRead = amazonOrderSummaryActionOptions.MarkEmailAsRead,
+								EvenIfAllEmailsAreRead = amazonOrderSummaryActionOptions.EvenIfAllEmailsAreRead,
+								SmtpAccount = amazonOrderSummaryActionOptions.SmtpAccount,
 								DateTime = DateTime.Now.AddDays(-7),
-								DaysToCheck = options.DaysToCheck
+								DaysToCheck = amazonOrderSummaryActionOptions.DaysToCheck,
+								Accounts = _mailButlerOptions.Value.Accounts
 							}, stoppingToken
 						);
 
 					break;
+				case Action.ForwardInvoicesToGetMyInvoices:
+					var forwardToGetMyInvoicesOptions = _mailButlerOptions.Value.ForwardToGetMyInvoices;
+					await scope.ServiceProvider
+						.GetRequiredService<ForwardToGetMyInvoicesAction>()
+						.ExecuteAsync(
+							new ForwardToGetMyInvoicesRequest
+							{
+								SmtpAccount = forwardToGetMyInvoicesOptions.SmtpAccount,
+								DateTime = DateTime.Now.AddDays(-2),
+								DaysToCheck = forwardToGetMyInvoicesOptions.DaysToCheck,
+								IonosAccountId = forwardToGetMyInvoicesOptions.IonosAccountId,
+								Recipients = forwardToGetMyInvoicesOptions.Recipients,
+								Accounts = _mailButlerOptions.Value.Accounts
+							}, stoppingToken
+						);
+					break;
+				case Action.Unknown:
+				case Action.CurrentAction:
 				default:
-					throw new ArgumentOutOfRangeException();
+					throw new ArgumentOutOfRangeException(type.ToString());
 			}
+
+			Action = Action.Unknown;
 		}
 
 		_logger.LogInformation("Finished background service worker");

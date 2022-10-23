@@ -34,15 +34,12 @@ services.AddLogging(builder =>
 services.AddSingleton<IConfiguration>(_ => configuration);
 
 services.Configure<MailButlerOptions>(configuration.GetSection("MailButler"));
-services.AddTransient<IList<Account>>(sp => sp.GetRequiredService<IOptions<MailButlerOptions>>().Value.Accounts);
 services.AddTransient<AmazonOrderSummaryAction>();
 
 
 using var scope = services.BuildServiceProvider().CreateScope();
 
 var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<Program>();
-var smtpAccount = scope.ServiceProvider.GetRequiredService<IList<Account>>()
-	.First(r => r.Name.Contains("iCloud", StringComparison.InvariantCultureIgnoreCase));
 var tokenSource = new CancellationTokenSource();
 var options = scope.ServiceProvider.GetRequiredService<IOptions<MailButlerOptions>>().Value;
 var startDate = DateTime.Now;

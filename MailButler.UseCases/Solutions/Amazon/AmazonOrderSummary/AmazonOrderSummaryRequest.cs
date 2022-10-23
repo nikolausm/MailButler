@@ -9,4 +9,5 @@ public sealed class AmazonOrderSummaryRequest
 	public bool EvenIfAllEmailsAreRead { get; init; } = true;
 	public DateTime DateTime { get; init; } = DateTime.Now.AddDays(-7);
 	public int DaysToCheck { get; init; } = 7;
+	public List<Account> Accounts { get; init; } = new ();
 }

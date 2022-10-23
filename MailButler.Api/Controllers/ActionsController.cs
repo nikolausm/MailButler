@@ -39,10 +39,12 @@ public class ActionsController : ControllerBase
 						: $"Currently running: {_backgroundServiceWorker.Action} {(DateTime.Now - _backgroundServiceWorker.Started).TotalSeconds} seconds");
 
 				case Action.AmazonOrderSummary:
+				case Action.ForwardInvoicesToGetMyInvoices:
 					_logger.LogInformation("Starting");
 					_backgroundServiceQueue.Enqueue(action);
 					result = Ok("Started");
 					break;
+				case Action.Unknown:
 				default:
 					result = BadRequest($"Unknown action {action}");
 					break;

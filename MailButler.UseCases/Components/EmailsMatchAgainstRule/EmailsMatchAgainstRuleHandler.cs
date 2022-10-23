@@ -58,7 +58,7 @@ public sealed class
 	{
 		return SplitInGroups(AsReversedList(filters))
 			.ToList()
-			.Any(groupedRules => groupedRules.Any(innerRules => AreRulesValid(email, innerRules)));
+			.Any(groupedRules => groupedRules.All(innerRules => AreRulesValid(email, innerRules)));
 	}
 
 	/// <summary>
@@ -103,6 +103,14 @@ public sealed class
 
 	private bool Match(Email email, IFilter filter)
 	{
+		switch (filter)
+		{
+			case HasAttachmentFilter:
+				return email.HasAttachments;
+			case UnreadFilter:
+				return !email.IsRead;
+		}
+
 		var result = filter.FilterType switch
 		{
 			FilterType.Contains => Value(email, filter.Field).Contains(filter.Value),
@@ -110,23 +118,24 @@ public sealed class
 			FilterType.SimpleString => filter.Value.IsSimpleFilterMatch(Value(email, filter.Field)),
 			FilterType.EndsWith => Value(email, filter.Field).EndsWith(filter.Value),
 			FilterType.StartsWith => Value(email, filter.Field).StartsWith(filter.Value),
+			FilterType.Equals => Value(email, filter.Field).Equals(filter.Value, StringComparison.InvariantCultureIgnoreCase),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 
-		if (_logger.IsEnabled(LogLevel.Debug))
-		{
-			var value = Value(email, filter.Field);
-			if (value.Length > 40) value = value.Substring(0, 40) + "...";
+		if (!_logger.IsEnabled(LogLevel.Debug)) 
+			return result;
+		
+		var value = Value(email, filter.Field);
+		if (value.Length > 40) value = value.Substring(0, 40) + "...";
 
-			_logger.LogTrace(
-				"{Filter} returns {Result} for {Email} from {From} where Value: {Value}",
-				filter,
-				email.Id,
-				email.Sender.Address,
-				result,
-				value
-			);
-		}
+		_logger.LogTrace(
+			"{Filter} returns {Result} for {Email} from {From} where Value: {Value}",
+			filter,
+			email.Id,
+			email.Sender.Address,
+			result,
+			value
+		);
 
 		return result;
 	}

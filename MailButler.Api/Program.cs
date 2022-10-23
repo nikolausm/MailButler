@@ -4,6 +4,7 @@ using MailButler.Api;
 using MailButler.Dtos;
 using MailButler.UseCases.Components.Extensions.DependencyInjection;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
+using MailButler.UseCases.Solutions.ForwardToGetMyInvoices;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 
@@ -45,10 +46,8 @@ builder.Services.AddSwaggerGen(options =>
 	});
 });
 builder.Services.Configure<MailButlerOptions>(configuration.GetSection("MailButler"));
-builder.Services.AddTransient<IList<Account>>(
-	sp => sp.GetRequiredService<IOptions<MailButlerOptions>>().Value.Accounts
-);
 builder.Services.AddTransient<AmazonOrderSummaryAction>();
+builder.Services.AddTransient<ForwardToGetMyInvoicesAction>();
 builder.Services.AddSingleton<BackgroundServiceQueue>();
 builder.Services.AddSingleton<BackgroundServiceWorker>();
 builder.Services.AddHostedService(e => e.GetRequiredService<BackgroundServiceWorker>());

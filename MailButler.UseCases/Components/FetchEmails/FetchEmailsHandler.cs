@@ -31,7 +31,7 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 			using var client = await _imapClientFactory.ImapClientAsync(request.Account, cancellationToken);
 			var source = client.Inbox;
 			await source.OpenAsync(FolderAccess.ReadOnly, cancellationToken);
-
+			_logger.LogTrace("{Account}", request.Account.ToString());
 			_logger.LogTrace("Total messages: {TotalMessageCount}", source.Count);
 			_logger.LogTrace("Recent messages: {RecentMessageCount}", source.Recent);
 

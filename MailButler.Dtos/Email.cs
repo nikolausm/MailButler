@@ -2,6 +2,7 @@ namespace MailButler.Dtos;
 
 public record Email
 {
+	public bool HasAttachments { get; init; } = false;
 	public Guid AccountId { get; init; } = Guid.Empty;
 	public string Subject { get; init; } = string.Empty;
 	public string? TextBody { get; init; }
