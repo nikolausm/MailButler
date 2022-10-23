@@ -5,7 +5,6 @@ using MailButler.UseCases.Components.EmailsMatchAgainstRule;
 using MailButler.UseCases.Components.FetchEmails;
 using MailButler.UseCases.Components.ForwardEmails;
 using MailButler.UseCases.Components.MarkAsRead;
-using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

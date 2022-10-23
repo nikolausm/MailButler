@@ -33,12 +33,14 @@ public class ActionsController : ControllerBase
 		{
 			switch (action)
 			{
+				
 				case Action.CurrentAction:
 					return Ok(_backgroundServiceWorker.Started == DateTime.MinValue
 						? "No Job running"
 						: $"Currently running: {_backgroundServiceWorker.Action} {(DateTime.Now - _backgroundServiceWorker.Started).TotalSeconds} seconds");
 
 				case Action.AmazonOrderSummary:
+				case Action.DeleteFromKnownSender:
 				case Action.ForwardInvoicesToGetMyInvoices:
 					_logger.LogInformation("Starting");
 					_backgroundServiceQueue.Enqueue(action);

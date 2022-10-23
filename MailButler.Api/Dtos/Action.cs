@@ -8,9 +8,11 @@ public enum Action
 
 	[Display(Name = "Amazon Order Summary")]
 	AmazonOrderSummary,
-	
+
 	[Display(Name = "Forward Invoices to GetMyInvoices")]
 	ForwardInvoicesToGetMyInvoices,
 
-	[Display(Name = "Current Action")] CurrentAction
+	[Display(Name = "Current Action")] CurrentAction,
+
+	[Display(Name = "Delete from known sender")] DeleteFromKnownSender
 }

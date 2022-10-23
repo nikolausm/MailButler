@@ -1,5 +1,6 @@
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using MailButler.UseCases.Solutions.ForwardToGetMyInvoices;
+using MailButler.UseCases.Solutions.Spamfilter;
 using Microsoft.Extensions.Options;
 using Action = MailButler.Api.Dtos.Action;
 
@@ -55,6 +56,7 @@ public sealed class BackgroundServiceWorker : BackgroundService
 
 			switch (type)
 			{
+				
 				case Action.AmazonOrderSummary:
 					var amazonOrderSummaryActionOptions = _mailButlerOptions.Value.AmazonOrderSummaryAction;
 					await scope.ServiceProvider
@@ -84,6 +86,20 @@ public sealed class BackgroundServiceWorker : BackgroundService
 								DaysToCheck = forwardToGetMyInvoicesOptions.DaysToCheck,
 								IonosAccountId = forwardToGetMyInvoicesOptions.IonosAccountId,
 								Recipients = forwardToGetMyInvoicesOptions.Recipients,
+								Accounts = _mailButlerOptions.Value.Accounts
+							}, stoppingToken
+						);
+					break;
+				case Action.DeleteFromKnownSender:
+					var deleteFromKnownSenderOptions = _mailButlerOptions.Value.DeleteFromKnownSender;
+					await scope.ServiceProvider
+						.GetRequiredService<DeleteFromKnownSenderAction>()
+						.ExecuteAsync(
+							new DeleteFromKnownSenderRequest
+							{
+								SenderAddresses = deleteFromKnownSenderOptions.SenderAddresses,
+								SmtpAccount = deleteFromKnownSenderOptions.SmtpAccount,
+								DaysToCheck = deleteFromKnownSenderOptions.DaysToCheck,
 								Accounts = _mailButlerOptions.Value.Accounts
 							}, stoppingToken
 						);
