@@ -17,15 +17,15 @@ public sealed class
 		_logger = logger;
 	}
 
-	public async Task<EmailsMatchAgainstRuleResponse> Handle(
+	public Task<EmailsMatchAgainstRuleResponse> Handle(
 		EmailsMatchAgainstRuleRequest request,
 		CancellationToken cancellationToken
 	)
 	{
-		return new EmailsMatchAgainstRuleResponse
+		return Task.FromResult(new EmailsMatchAgainstRuleResponse
 		{
 			Result = request.Emails.Where(email => Filter(email, request.Filter)).ToList()
-		};
+		});
 	}
 
 	/// <summary>
@@ -118,13 +118,14 @@ public sealed class
 			FilterType.SimpleString => filter.Value.IsSimpleFilterMatch(Value(email, filter.Field)),
 			FilterType.EndsWith => Value(email, filter.Field).EndsWith(filter.Value),
 			FilterType.StartsWith => Value(email, filter.Field).StartsWith(filter.Value),
-			FilterType.Equals => Value(email, filter.Field).Equals(filter.Value, StringComparison.InvariantCultureIgnoreCase),
+			FilterType.Equals => Value(email, filter.Field)
+				.Equals(filter.Value, StringComparison.InvariantCultureIgnoreCase),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 
-		if (!_logger.IsEnabled(LogLevel.Debug)) 
+		if (!_logger.IsEnabled(LogLevel.Debug))
 			return result;
-		
+
 		var value = Value(email, filter.Field);
 		if (value.Length > 40) value = value.Substring(0, 40) + "...";
 

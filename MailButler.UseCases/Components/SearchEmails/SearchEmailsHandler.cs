@@ -2,7 +2,6 @@ using MailButler.Core;
 using MailButler.Dtos;
 using MailButler.UseCases.Components.Extensions;
 using MailKit;
-using MailKit.Search;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using MimeKit;

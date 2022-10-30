@@ -12,8 +12,8 @@ namespace MailButler.UseCases.Solutions.ForwardToGetMyInvoices;
 
 public sealed class ForwardToGetMyInvoicesAction
 {
-	private readonly IMediator _mediator;
 	private readonly ILogger<ForwardToGetMyInvoicesAction> _logger;
+	private readonly IMediator _mediator;
 
 	public ForwardToGetMyInvoicesAction(
 		IMediator mediator,

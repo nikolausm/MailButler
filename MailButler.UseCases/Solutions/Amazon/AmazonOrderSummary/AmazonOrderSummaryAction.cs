@@ -112,7 +112,7 @@ public sealed class AmazonOrderSummaryAction
 		var getAmazonOrderEmailsResponse = await _mediator.Send(
 			new GetAmazonOrderEmailsRequest
 			{
-				Emails = emailMatchAgainstRuleResponse.Result,
+				Emails = emailMatchAgainstRuleResponse.Result
 			}, cancellationToken
 		);
 
@@ -176,7 +176,8 @@ public sealed class AmazonOrderSummaryAction
 		_logger.LogInformation("Result: {Result}", getSummaryEmailForAmazon.Result.ToDictionary());
 	}
 
-	private async Task MarkEmailsAsRead(GetAmazonOrderEmailsResponse getAmazonOrderEmailsResponse, AmazonOrderSummaryRequest request)
+	private async Task MarkEmailsAsRead(GetAmazonOrderEmailsResponse getAmazonOrderEmailsResponse,
+		AmazonOrderSummaryRequest request)
 	{
 		foreach (var accountId in getAmazonOrderEmailsResponse.Result.Keys.Select(d => d.AccountId).Distinct())
 		{

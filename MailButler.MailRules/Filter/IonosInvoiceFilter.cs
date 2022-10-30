@@ -5,7 +5,6 @@ namespace MailButler.MailRules.Filter;
 public sealed record IonosInvoiceFilter() : IFilters
 {
 	private readonly IFilters _filter;
-	private readonly IFilters? _predecessor;
 
 	public IonosInvoiceFilter(string ionosAccountId)
 		: this()
@@ -19,7 +18,7 @@ public sealed record IonosInvoiceFilter() : IFilters
 			).And(Field.Subject, FilterType.StartsWith, "Ihre Rechnung")
 			.And(new HasAttachmentFilter())
 			.And(Field.Subject, FilterType.EndsWith, $"für den Vertrag {ionosAccountId}");
-		_predecessor = _filter.Predecessor;
+		Predecessor = _filter.Predecessor;
 	}
 
 	public IEnumerator<IFilter> GetEnumerator()
@@ -68,9 +67,5 @@ public sealed record IonosInvoiceFilter() : IFilters
 
 	public LogicalOperator LogicalOperator => _filter.LogicalOperator;
 
-	public IFilters? Predecessor
-	{
-		get => _predecessor;
-		init => _predecessor = value;
-	}
+	public IFilters? Predecessor { get; init; }
 }

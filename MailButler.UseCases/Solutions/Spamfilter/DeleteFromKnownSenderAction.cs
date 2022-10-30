@@ -1,5 +1,8 @@
+using MailButler.Dtos;
 using MailButler.UseCases.Components.DeleteEmails;
+using MailButler.UseCases.Components.EmailsSummary;
 using MailButler.UseCases.Components.SearchEmails;
+using MailButler.UseCases.Components.SendEmail;
 using MailKit.Search;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,11 +11,13 @@ namespace MailButler.UseCases.Solutions.Spamfilter;
 
 public sealed class DeleteFromKnownSenderAction
 {
-	private readonly IMediator _mediator;
 	private readonly ILogger<DeleteFromKnownSenderAction> _logger;
+	private readonly IMediator _mediator;
 
-	public DeleteFromKnownSenderAction(IMediator mediator, ILogger<DeleteFromKnownSenderAction> logger)
-
+	public DeleteFromKnownSenderAction(
+		IMediator mediator,
+		ILogger<DeleteFromKnownSenderAction> logger
+	)
 	{
 		_mediator = mediator;
 		_logger = logger;
@@ -41,41 +46,65 @@ public sealed class DeleteFromKnownSenderAction
 		);
 
 		foreach (var email in tasks.SelectMany(task => task.Result.Result))
-		{
 			_logger.LogDebug("Deleting email: {Email}", email);
-		}
 
 		#endregion
 
 		#region Deleting emails
+
 		if (request.DeleteEmails)
 		{
 			var deleteTasks = request.Accounts.Select(account =>
-				_mediator.Send(new DeleteEmailsRequest
-				{
-					Account = account,
-					Emails = tasks
-						.SelectMany(t => t.Result.Result)
-						.Where(e => e.AccountId == account.Id).ToList()
-				}, cancellationToken)).ToList();
+				_mediator.Send(
+					new DeleteEmailsRequest
+					{
+						Account = account,
+						Emails = tasks
+							.SelectMany(t => t.Result.Result)
+							.Where(e => e.AccountId == account.Id).ToList()
+					}, cancellationToken)
+			).ToList();
 
 			await Task.WhenAll(deleteTasks);
 
 			_logger.LogInformation("Deleted emails");
 		}
+
+		#endregion
+
+		#region Send Summary Email
+
+		var summaryEmail = await _mediator.Send(new EmailsSummaryRequest
+			{
+				Emails = tasks.SelectMany(task => task.Result.Result).ToList()
+			}, cancellationToken
+		);
+
+		var sendEmailResponse = await _mediator.Send(
+			new SendEmailRequest
+			{
+				Account = request.SmtpAccount,
+				Email = summaryEmail.Result
+			}, cancellationToken
+		);
+
+		if (sendEmailResponse.Status == Status.Failed)
+		{
+			_logger.LogError("Failed to send summary email: {Message}", sendEmailResponse.Message);
+		}
+
 		#endregion
 	}
+
 
 	private static SearchQuery BuildSearchQuery(DeleteFromKnownSenderRequest request)
 	{
 		SearchQuery dateSearch = new DateSearchQuery(SearchTerm.SentSince, DateTime.Now.AddDays(-request.DaysToCheck));
 		SearchQuery? emails = null;
 		foreach (var email in request.SenderAddresses)
-		{
 			emails = emails is null
 				? SearchQuery.FromContains(email)
 				: emails.Or(SearchQuery.FromContains(email));
-		}
 
 		return dateSearch.And(emails);
 	}

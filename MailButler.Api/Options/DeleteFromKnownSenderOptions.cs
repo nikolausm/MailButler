@@ -1,6 +1,6 @@
 using MailButler.Dtos;
 
-namespace MailButler.Api;
+namespace MailButler.Api.Options;
 
 public sealed class DeleteFromKnownSenderOptions
 {

@@ -1,12 +1,13 @@
+using MailButler.Api.Options;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using MailButler.UseCases.Solutions.ForwardToGetMyInvoices;
 using MailButler.UseCases.Solutions.Spamfilter;
 using Microsoft.Extensions.Options;
 using Action = MailButler.Api.Dtos.Action;
 
-namespace MailButler.Api;
+namespace MailButler.Api.BackgroundService;
 
-public sealed class BackgroundServiceWorker : BackgroundService
+public sealed class BackgroundServiceWorker : Microsoft.Extensions.Hosting.BackgroundService
 {
 	private readonly IServiceScopeFactory _factory;
 	private readonly ILogger<BackgroundServiceWorker> _logger;
@@ -18,7 +19,8 @@ public sealed class BackgroundServiceWorker : BackgroundService
 		IServiceScopeFactory factory,
 		ILogger<BackgroundServiceWorker> logger,
 		BackgroundServiceQueue queue,
-		IOptions<MailButlerOptions> mailButlerOptions
+		IOptions<MailButlerOptions> mailButlerOptions,
+		IConfiguration configuration
 	)
 	{
 		_factory = factory;
@@ -56,7 +58,6 @@ public sealed class BackgroundServiceWorker : BackgroundService
 
 			switch (type)
 			{
-				
 				case Action.AmazonOrderSummary:
 					var amazonOrderSummaryActionOptions = _mailButlerOptions.Value.AmazonOrderSummaryAction;
 					await scope.ServiceProvider
@@ -111,6 +112,7 @@ public sealed class BackgroundServiceWorker : BackgroundService
 			}
 
 			Action = Action.Unknown;
+			Started = DateTime.MinValue;
 		}
 
 		_logger.LogInformation("Finished background service worker");

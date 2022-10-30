@@ -1,3 +1,4 @@
+using MailButler.Api.BackgroundService;
 using MailButler.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Action = MailButler.Api.Dtos.Action;
@@ -28,12 +29,11 @@ public class ActionsController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public IActionResult GetAsync(Action action, CancellationToken cancellationToken)
 	{
-		IActionResult result;
 		using (var _ = _logger.BeginScope($"{action.ToString()} =>"))
 		{
+			IActionResult result;
 			switch (action)
 			{
-				
 				case Action.CurrentAction:
 					return Ok(_backgroundServiceWorker.Started == DateTime.MinValue
 						? "No Job running"

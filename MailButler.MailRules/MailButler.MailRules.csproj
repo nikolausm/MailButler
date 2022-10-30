@@ -7,18 +7,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MailButler.Core\MailButler.Core.csproj" />
-        <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj" />
+        <ProjectReference Include="..\MailButler.Core\MailButler.Core.csproj"/>
+        <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Extensions.Dictionary" Version="2.2.6" />
+        <PackageReference Include="Extensions.Dictionary" Version="2.2.6"/>
         <PackageReference Include="Fody" Version="6.6.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="MediatR.Contracts" Version="1.0.1" />
-        <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
+        <PackageReference Include="MediatR.Contracts" Version="1.0.1"/>
+        <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All"/>
     </ItemGroup>
 
 </Project>

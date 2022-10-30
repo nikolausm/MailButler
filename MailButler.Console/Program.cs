@@ -1,7 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using MailButler.Console;
-using MailButler.Dtos;
 using MailButler.UseCases.Components.Extensions.DependencyInjection;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 var configuration = new ConfigurationBuilder()
 	.AddJsonFile("appsettings.json")
@@ -58,17 +58,15 @@ using (var _ = logger.BeginScope("AmazonOrderSummaryAction =>"))
 			}, tokenSource.Token
 		);
 	logger.LogInformation("Finished run for {Date:yyyy-MM-dd}", DateTime.Today);
-	
+
 	#region Update Runtime
-	dynamic? jsonObj = JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(
+
+	dynamic? jsonObj = JsonConvert.DeserializeObject<JObject>(
 		File.ReadAllText("appsettings.json")
 	);
-	if (jsonObj is null)
-	{
-		throw new Exception("Failed to read appsettings.json");
-	}
+	if (jsonObj is null) throw new Exception("Failed to read appsettings.json");
 	jsonObj["MailButler"]["AmazonOrderSummaryAction"]["LastRun"] = startDate.ToString("s");
 	File.WriteAllText("appsettings.json", JsonConvert.SerializeObject(jsonObj, Formatting.Indented));
+
 	#endregion
 }
-

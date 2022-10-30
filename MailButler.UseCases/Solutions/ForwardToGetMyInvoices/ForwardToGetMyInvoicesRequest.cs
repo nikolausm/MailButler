@@ -1,4 +1,3 @@
-using System.Data.SqlTypes;
 using MailButler.Dtos;
 
 namespace MailButler.UseCases.Solutions.ForwardToGetMyInvoices;

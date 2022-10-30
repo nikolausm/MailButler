@@ -1,4 +1,3 @@
-using System.Reflection.Metadata;
 using Extensions.Dictionary;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
@@ -41,7 +40,7 @@ public sealed class CheckConnectionsHandler : IRequestHandler<CheckConnectionsRe
 				if (_logger.IsEnabled(LogLevel.Warning))
 				{
 					var asDictionary = account.ToDictionary();
-					
+
 					if (asDictionary.ContainsKey(nameof(Account.Password)))
 						asDictionary[nameof(Account.Password)] = "*******";
 

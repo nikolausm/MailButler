@@ -1,9 +1,10 @@
 using MailButler.Dtos;
 
-namespace MailButler.Api;
+namespace MailButler.Api.Options;
 
 public sealed class MailButlerOptions
 {
+	public AzureJsonOptions AzureJson { get; init; } = new();
 	public List<Account> Accounts { get; init; } = new();
 	public AmazonOrderSummaryActionOptions AmazonOrderSummaryAction { get; init; } = new();
 	public ForwardToGetMyInvoicesOptions ForwardToGetMyInvoices { get; init; } = new();

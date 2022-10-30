@@ -66,7 +66,8 @@ public sealed class ForwardEmailsHandler : IRequestHandler<ForwardEmailsRequest,
 		}
 	}
 
-	private async Task ForwardEmail(ForwardEmailsRequest request, CancellationToken cancellationToken, IMailFolder source,
+	private async Task ForwardEmail(ForwardEmailsRequest request, CancellationToken cancellationToken,
+		IMailFolder source,
 		Email email)
 	{
 		var message = await source.GetMessageAsync(

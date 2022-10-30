@@ -14,5 +14,6 @@ public enum Action
 
 	[Display(Name = "Current Action")] CurrentAction,
 
-	[Display(Name = "Delete from known sender")] DeleteFromKnownSender
+	[Display(Name = "Delete from known sender")]
+	DeleteFromKnownSender
 }
