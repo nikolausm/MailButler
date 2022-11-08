@@ -2,7 +2,7 @@ using MailButler.Core;
 using MailButler.Dtos;
 using MailButler.UseCases.Components.Extensions;
 using MailKit;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 
@@ -22,7 +22,7 @@ public sealed class SearchEmailsHandler : IRequestHandler<SearchEmailsRequest, S
 		_logger = logger;
 	}
 
-	public async Task<SearchEmailsResponse> Handle(SearchEmailsRequest request, CancellationToken cancellationToken)
+	public async ValueTask<SearchEmailsResponse> Handle(SearchEmailsRequest request, CancellationToken cancellationToken)
 	{
 		List<Email> emails = new();
 		try

@@ -1,6 +1,6 @@
 using MailButler.Dtos;
 using MailKit.Search;
-using MediatR;
+using Mediator;
 
 namespace MailButler.UseCases.Components.SearchEmails;
 

@@ -1,7 +1,7 @@
 using MailButler.Core;
 using MailButler.Dtos;
 using MailKit;
-using MediatR;
+using Mediator;
 using UniqueId = MailKit.UniqueId;
 
 namespace MailButler.UseCases.Components.MarkAsRead;
@@ -15,7 +15,7 @@ public sealed class MarkAsReadHandler : IRequestHandler<MarkAsReadRequest, MarkA
 		_clientFactory = clientFactory;
 	}
 
-	public async Task<MarkAsReadResponse> Handle(MarkAsReadRequest request, CancellationToken cancellationToken)
+	public async ValueTask<MarkAsReadResponse> Handle(MarkAsReadRequest request, CancellationToken cancellationToken)
 	{
 		try
 		{

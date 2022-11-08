@@ -1,7 +1,7 @@
 using MailButler.Core;
 using MailButler.Dtos;
 using MailKit;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 using UniqueId = MailKit.UniqueId;
@@ -25,7 +25,7 @@ public sealed class ForwardEmailsHandler : IRequestHandler<ForwardEmailsRequest,
 		_smtpClientFactory = smtpClientFactory;
 	}
 
-	public async Task<ForwardEmailsResponse> Handle(ForwardEmailsRequest request, CancellationToken cancellationToken)
+	public async ValueTask<ForwardEmailsResponse> Handle(ForwardEmailsRequest request, CancellationToken cancellationToken)
 	{
 		List<Email> emails = new();
 		try

@@ -7,7 +7,7 @@ using MailButler.Core;
 using MailButler.Dtos;
 using MailKit.Net.Imap;
 using MailKit.Security;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace MailButler.UseCases.Components.CheckConnections;
@@ -23,7 +23,7 @@ public sealed class CheckConnectionsHandler : IRequestHandler<CheckConnectionsRe
 		_imapClientFactory = imapClientFactory;
 	}
 
-	public async Task<CheckConnectionsResponse> Handle(CheckConnectionsRequest request,
+	public async ValueTask<CheckConnectionsResponse> Handle(CheckConnectionsRequest request,
 		CancellationToken cancellationToken)
 	{
 		Dictionary<Account, ConnectionStatus> connectionStatuses = new();

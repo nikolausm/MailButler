@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using MailButler.Core.Extensions;
 using MailButler.Dtos;
 using MailButler.MailRules.Filter;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace MailButler.UseCases.Components.EmailsMatchAgainstRule;
@@ -17,12 +17,12 @@ public sealed class
 		_logger = logger;
 	}
 
-	public Task<EmailsMatchAgainstRuleResponse> Handle(
+	public ValueTask<EmailsMatchAgainstRuleResponse> Handle(
 		EmailsMatchAgainstRuleRequest request,
 		CancellationToken cancellationToken
 	)
 	{
-		return Task.FromResult(new EmailsMatchAgainstRuleResponse
+		return ValueTask.FromResult(new EmailsMatchAgainstRuleResponse
 		{
 			Result = request.Emails.Where(email => Filter(email, request.Filter)).ToList()
 		});

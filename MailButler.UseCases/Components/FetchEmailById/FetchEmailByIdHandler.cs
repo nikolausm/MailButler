@@ -3,7 +3,7 @@ using MailButler.Core;
 using MailButler.Dtos;
 using MailButler.UseCases.Components.Extensions;
 using MailKit;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using UniqueId = MailKit.UniqueId;
 
@@ -23,7 +23,7 @@ public sealed class FetchEmailByIdHandler : IRequestHandler<FetchEmailByIdReques
 		_logger = logger;
 	}
 
-	public async Task<FetchEmailByIdResponse> Handle(FetchEmailByIdRequest request, CancellationToken cancellationToken)
+	public async ValueTask<FetchEmailByIdResponse> Handle(FetchEmailByIdRequest request, CancellationToken cancellationToken)
 	{
 		try
 		{

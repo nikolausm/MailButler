@@ -5,7 +5,7 @@ using MailButler.UseCases.Components.EmailsMatchAgainstRule;
 using MailButler.UseCases.Components.FetchEmails;
 using MailButler.UseCases.Components.ForwardEmails;
 using MailButler.UseCases.Components.MarkAsRead;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace MailButler.UseCases.Solutions.ForwardToGetMyInvoices;

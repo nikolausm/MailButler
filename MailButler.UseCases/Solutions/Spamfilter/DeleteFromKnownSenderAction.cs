@@ -4,7 +4,7 @@ using MailButler.UseCases.Components.EmailsSummary;
 using MailButler.UseCases.Components.SearchEmails;
 using MailButler.UseCases.Components.SendEmail;
 using MailKit.Search;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace MailButler.UseCases.Solutions.Spamfilter;
@@ -36,7 +36,8 @@ public sealed class DeleteFromKnownSenderAction
 				},
 				cancellationToken
 			)
-		).ToList();
+		).Select(t => t.AsTask())
+			.ToList();
 
 		await Task.WhenAll(tasks);
 
@@ -63,7 +64,8 @@ public sealed class DeleteFromKnownSenderAction
 							.SelectMany(t => t.Result.Result)
 							.Where(e => e.AccountId == account.Id).ToList()
 					}, cancellationToken)
-			).ToList();
+			).Select(t => t.AsTask())
+				.ToList();
 
 			await Task.WhenAll(deleteTasks);
 

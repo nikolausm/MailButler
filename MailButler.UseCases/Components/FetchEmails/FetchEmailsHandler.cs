@@ -3,7 +3,7 @@ using MailButler.Dtos;
 using MailButler.UseCases.Components.Extensions;
 using MailKit;
 using MailKit.Search;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 
@@ -23,7 +23,7 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 		_logger = logger;
 	}
 
-	public async Task<FetchEmailsResponse> Handle(FetchEmailsRequest request, CancellationToken cancellationToken)
+	public async ValueTask<FetchEmailsResponse> Handle(FetchEmailsRequest request, CancellationToken cancellationToken)
 	{
 		List<Email> emails = new();
 		try

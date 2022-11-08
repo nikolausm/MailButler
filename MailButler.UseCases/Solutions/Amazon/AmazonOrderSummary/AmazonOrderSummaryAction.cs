@@ -8,7 +8,7 @@ using MailButler.UseCases.Components.EmailsMatchAgainstRule;
 using MailButler.UseCases.Components.FetchEmails;
 using MailButler.UseCases.Components.MarkAsRead;
 using MailButler.UseCases.Components.SendEmail;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;

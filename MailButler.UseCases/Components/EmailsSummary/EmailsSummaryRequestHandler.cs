@@ -1,6 +1,6 @@
 using System.Text;
 using MailButler.Dtos;
-using MediatR;
+using Mediator;
 
 namespace MailButler.UseCases.Components.EmailsSummary;
 
@@ -12,11 +12,11 @@ public sealed class EmailsSummaryRequestHandler: IRequestHandler<EmailsSummaryRe
 	{
 		_emailBodyParts = emailBodyParts;
 	}
-	public Task<EmailsSummaryResponse> Handle(EmailsSummaryRequest request, CancellationToken cancellationToken)
+	public ValueTask<EmailsSummaryResponse> Handle(EmailsSummaryRequest request, CancellationToken cancellationToken)
 	{
 		try
 		{
-			return Task.FromResult(new EmailsSummaryResponse
+			return ValueTask.FromResult(new EmailsSummaryResponse
 			{
 				Result = new Email
 				{
@@ -28,7 +28,7 @@ public sealed class EmailsSummaryRequestHandler: IRequestHandler<EmailsSummaryRe
 		}
 		catch (Exception e)
 		{
-			return Task.FromResult(new EmailsSummaryResponse
+			return ValueTask.FromResult(new EmailsSummaryResponse
 			{
 				Message = e.Message,
 				Status = Status.Failed

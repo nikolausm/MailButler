@@ -1,7 +1,7 @@
 using MailButler.Core;
 using MailButler.Dtos;
 using MailKit;
-using MediatR;
+using Mediator;
 using UniqueId = MailKit.UniqueId;
 
 namespace MailButler.UseCases.Components.DeleteEmails;
@@ -15,7 +15,7 @@ public sealed class DeleteEmailsHandler : IRequestHandler<DeleteEmailsRequest, D
 		_clientFactory = clientFactory;
 	}
 
-	public async Task<DeleteEmailsResponse> Handle(DeleteEmailsRequest request, CancellationToken cancellationToken)
+	public async ValueTask<DeleteEmailsResponse> Handle(DeleteEmailsRequest request, CancellationToken cancellationToken)
 	{
 		try
 		{

@@ -1,7 +1,7 @@
 using System.Text;
 using MailButler.Dtos;
 using MailButler.UseCases.Components.Amazon.GetAmazonOrderSummary.Extensions;
-using MediatR;
+using Mediator;
 
 namespace MailButler.UseCases.Components.Amazon.GetAmazonOrderSummary;
 
@@ -18,13 +18,13 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 	{
 		_emailBodyParts = emailBodyParts;
 	}
-	public Task<GetAmazonOrderEmailsSummaryResponse> Handle(
+	public ValueTask<GetAmazonOrderEmailsSummaryResponse> Handle(
 		GetAmazonOrderEmailsSummaryRequest request,
 		CancellationToken cancellationToken)
 	{
 		_accounts = request.Accounts;
 		if (request.EmailsWithOrders.Keys.Count == 0)
-			return Task.FromResult(new GetAmazonOrderEmailsSummaryResponse
+			return ValueTask.FromResult(new GetAmazonOrderEmailsSummaryResponse
 			{
 				Result = new Email
 				{
@@ -35,7 +35,7 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 			});
 
 		if (request.EmailsWithOrders.Keys.All(email => email.IsRead))
-			return Task.FromResult(
+			return ValueTask.FromResult(
 				new GetAmazonOrderEmailsSummaryResponse
 				{
 					Result = new Email
@@ -53,7 +53,7 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 				}
 			);
 
-		return Task.FromResult(
+		return ValueTask.FromResult(
 			new GetAmazonOrderEmailsSummaryResponse
 			{
 				Result = SummaryEmail(request.EmailsWithOrders)

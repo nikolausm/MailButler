@@ -1,5 +1,5 @@
 using MailButler.Dtos;
-using MediatR;
+using Mediator;
 
 namespace MailButler.UseCases.Components.Amazon.GetAmazonOrderSummary;
 

@@ -1,6 +1,6 @@
 using MailButler.Dtos;
 using MailButler.MailRules.Filter;
-using MediatR;
+using Mediator;
 
 namespace MailButler.UseCases.Components.EmailsMatchAgainstRule;
 

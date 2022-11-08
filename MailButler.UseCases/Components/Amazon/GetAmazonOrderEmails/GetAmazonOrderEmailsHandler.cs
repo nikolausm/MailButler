@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Extensions.Dictionary;
 using MailButler.Dtos;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace MailButler.UseCases.Components.Amazon.GetAmazonOrderEmails;
@@ -20,7 +20,7 @@ public sealed class
 		_logger = logger;
 	}
 
-	public Task<GetAmazonOrderEmailsResponse> Handle(
+	public ValueTask<GetAmazonOrderEmailsResponse> Handle(
 		GetAmazonOrderEmailsRequest request,
 		CancellationToken cancellationToken
 	)
@@ -34,7 +34,7 @@ public sealed class
 			request.Emails
 				.ForEach(message => AddOrderInformation(message, orders));
 
-			return Task.FromResult(
+			return ValueTask.FromResult(
 				new GetAmazonOrderEmailsResponse
 				{
 					Result = orders
@@ -50,7 +50,7 @@ public sealed class
 					request.ToDictionary()
 				);
 
-			return Task.FromResult(
+			return ValueTask.FromResult(
 				new GetAmazonOrderEmailsResponse
 				{
 					Status = Status.Failed,

@@ -1,6 +1,6 @@
 using MailButler.Core;
 using MailButler.Dtos;
-using MediatR;
+using Mediator;
 using MimeKit;
 
 namespace MailButler.UseCases.Components.SendEmail;
@@ -14,7 +14,7 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailRequest, SendEma
 		_smtpClientFactory = smtpClientFactory;
 	}
 
-	public async Task<SendEmailResponse> Handle(SendEmailRequest request, CancellationToken cancellationToken)
+	public async ValueTask<SendEmailResponse> Handle(SendEmailRequest request, CancellationToken cancellationToken)
 	{
 		try
 		{
