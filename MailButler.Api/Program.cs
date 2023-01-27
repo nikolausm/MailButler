@@ -66,6 +66,7 @@ builder.Services.AddTransient<DeleteFromKnownSenderAction>();
 builder.Services.AddSingleton<BackgroundServiceQueue>();
 builder.Services.AddSingleton<BackgroundServiceWorker>();
 builder.Services.AddTransient<EmailBodyParts>();
+builder.Services.AddTransient<MarkOldEmailsAsReadAction>();
 
 builder.Services.AddHostedService(e => e.GetRequiredService<BackgroundServiceWorker>());
 

@@ -91,6 +91,23 @@ public sealed class BackgroundServiceWorker : Microsoft.Extensions.Hosting.Backg
 							}, stoppingToken
 						);
 					break;
+				case Action.MarkOldEmailAsRead:
+
+					MarkOldEmailsAsReadOptions markOldEmailsAsReadOptions =
+						_mailButlerOptions.Value.MarkOldEmailsAsRead;
+					await scope.ServiceProvider
+						.GetRequiredService<MarkOldEmailsAsReadAction>()
+						.ExecuteAsync(
+							new MarkOldEmailsAsReadRequest()
+							{
+								SenderAddresses = markOldEmailsAsReadOptions.SenderAddresses,
+								SmtpAccount = markOldEmailsAsReadOptions.SmtpAccount,
+								DaysToCheck = markOldEmailsAsReadOptions.DaysToCheck,
+								Accounts = _mailButlerOptions.Value.Accounts,
+								TimeSpan = markOldEmailsAsReadOptions.TimeSpan
+							}, stoppingToken
+						);
+					break;
 				case Action.DeleteFromKnownSender:
 					var deleteFromKnownSenderOptions = _mailButlerOptions.Value.DeleteFromKnownSender;
 					await scope.ServiceProvider

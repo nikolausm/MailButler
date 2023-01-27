@@ -1,6 +1,7 @@
 using MailButler.Dtos;
 using MailButler.UseCases.Components.DeleteEmails;
 using MailButler.UseCases.Components.EmailsSummary;
+using MailButler.UseCases.Components.MarkAsRead;
 using MailButler.UseCases.Components.SearchEmails;
 using MailButler.UseCases.Components.SendEmail;
 using MailKit.Search;
@@ -9,34 +10,34 @@ using Microsoft.Extensions.Logging;
 
 namespace MailButler.UseCases.Solutions.Spamfilter;
 
-public sealed class DeleteFromKnownSenderAction
+public sealed class MarkOldEmailsAsReadAction
 {
-	private readonly ILogger<DeleteFromKnownSenderAction> _logger;
+	private readonly ILogger<MarkOldEmailsAsReadAction> _logger;
 	private readonly IMediator _mediator;
 
-	public DeleteFromKnownSenderAction(
+	public MarkOldEmailsAsReadAction(
 		IMediator mediator,
-		ILogger<DeleteFromKnownSenderAction> logger
+		ILogger<MarkOldEmailsAsReadAction> logger
 	)
 	{
 		_mediator = mediator;
 		_logger = logger;
 	}
 
-	public async Task ExecuteAsync(DeleteFromKnownSenderRequest request, CancellationToken cancellationToken)
+	public async Task ExecuteAsync(MarkOldEmailsAsReadRequest request, CancellationToken cancellationToken)
 	{
 		#region Getting emails
 
 		var tasks = request.Accounts.Select(
-			account => _mediator.Send(
-				new SearchEmailsRequest
-				{
-					Account = account,
-					Query = BuildSearchQuery(request)
-				},
-				cancellationToken
-			)
-		).Select(t => t.AsTask())
+				account => _mediator.Send(
+					new SearchEmailsRequest
+					{
+						Account = account,
+						Query = BuildSearchQuery(request)
+					},
+					cancellationToken
+				)
+			).Select(t => t.AsTask())
 			.ToList();
 
 		await Task.WhenAll(tasks);
@@ -51,35 +52,32 @@ public sealed class DeleteFromKnownSenderAction
 
 		#endregion
 
-		#region Deleting emails
+		#region Marking emails as read
 
-		if (request.DeleteEmails)
-		{
-			var deleteTasks = request.Accounts.Select(account =>
+		var markAsRead = request.Accounts.Select(account =>
 				_mediator.Send(
-					new DeleteEmailsRequest
+					new MarkAsReadRequest
 					{
 						Account = account,
-						Emails = tasks
-							.SelectMany(t => t.Result.Result)
-							.Where(e => e.AccountId == account.Id).ToList()
+						Emails = tasks.SelectMany(task => task.Result.Result).ToList()
 					}
 					, cancellationToken)
 			).Select(t => t.AsTask())
-				.ToList();
-			
-			await Task.WhenAll(deleteTasks);
+			.ToList();
 
-			_logger.LogInformation("Deleted emails");
-		}
+		await Task.WhenAll(markAsRead);
+
+		_logger.LogInformation("Deleted emails");
 
 		#endregion
 
 		#region Send Summary Email
+
 		// Send summary email
-		
+
 		var summaryEmail = await _mediator.Send(new EmailsSummaryRequest
 			{
+				Subject = "MailButler: Marked old emails as read",
 				Emails = tasks.SelectMany(task => task.Result.Result).ToList()
 			}, cancellationToken
 		);
@@ -101,15 +99,19 @@ public sealed class DeleteFromKnownSenderAction
 	}
 
 
-	private static SearchQuery BuildSearchQuery(DeleteFromKnownSenderRequest request)
+	private static SearchQuery BuildSearchQuery(MarkOldEmailsAsReadRequest request)
 	{
 		SearchQuery dateSearch = new DateSearchQuery(SearchTerm.SentSince, DateTime.Now.AddDays(-request.DaysToCheck));
+		dateSearch.And(new DateSearchQuery(SearchTerm.SentBefore, DateTime.Now - request.TimeSpan));
+
 		SearchQuery? emails = null;
 		foreach (var email in request.SenderAddresses)
 			emails = emails is null
 				? SearchQuery.FromContains(email)
 				: emails.Or(SearchQuery.FromContains(email));
 
-		return dateSearch.And(emails);
+		return dateSearch
+			.And(SearchQuery.NotSeen)
+			.And(emails);
 	}
 }

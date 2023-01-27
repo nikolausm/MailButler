@@ -15,5 +15,8 @@ public enum Action
 	[Display(Name = "Current Action")] CurrentAction,
 
 	[Display(Name = "Delete from known sender")]
-	DeleteFromKnownSender
+	DeleteFromKnownSender,
+	
+	[Display(Name = "Mark old email as read")]
+	MarkOldEmailAsRead
 }

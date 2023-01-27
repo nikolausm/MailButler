@@ -12,15 +12,16 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Google.Apis.Auth" Version="1.57.0" />
-        <PackageReference Include="MailKit" Version="3.4.1" />
-        <PackageReference Include="Mediator.Abstractions" Version="1.0.5" />
-        <PackageReference Include="Mediator.SourceGenerator" Version="1.0.5">
+        <PackageReference Include="Google.Apis.Auth" Version="1.58.0" />
+        <PackageReference Include="MailKit" Version="3.4.3" />
+        <PackageReference Include="Mediator.Abstractions" Version="2.0.29" />
+        <PackageReference Include="Mediator.SourceGenerator" Version="2.0.29">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.3" />
         <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
+        <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
     </ItemGroup>
 
     <ItemGroup>

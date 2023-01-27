@@ -41,6 +41,7 @@ public class ActionsController : ControllerBase
 
 				case Action.AmazonOrderSummary:
 				case Action.DeleteFromKnownSender:
+				case Action.MarkOldEmailAsRead:
 				case Action.ForwardInvoicesToGetMyInvoices:
 					_logger.LogInformation("Starting");
 					_backgroundServiceQueue.Enqueue(action);

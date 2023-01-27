@@ -20,7 +20,7 @@ public sealed class EmailsSummaryRequestHandler: IRequestHandler<EmailsSummaryRe
 			{
 				Result = new Email
 				{
-					Subject = "MailButler: Spamfilter Summary",
+					Subject = request.Subject,
 					TextBody = CreateTextBody(request.Emails),
 					HtmlBody = CreateHtmlBody(request.Emails)
 				}
