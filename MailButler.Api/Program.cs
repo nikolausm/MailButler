@@ -24,8 +24,8 @@ var baseConfiguration = baseConfigurationBuilder
 
 var configuration = baseConfigurationBuilder
 	.AddAzureJson<MailButlerOptions>(
-		baseConfiguration["MailButler:AzureJson:ContainerRoot"],
-		baseConfiguration["MailButler:AzureJson:FileName"],
+		baseConfiguration["MailButler:AzureJson:ContainerRoot"] ?? throw new Exception("AzureJson:ContainerRoot is not set"),
+		baseConfiguration["MailButler:AzureJson:FileName"] ?? throw new Exception("AzureJson:FileName is not set"),
 		"MailButler"
 	)
 	.AddEnvironmentVariables()

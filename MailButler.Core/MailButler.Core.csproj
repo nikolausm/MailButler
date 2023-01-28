@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Extensions.Dictionary" Version="2.2.6" />
+        <PackageReference Include="Extensions.Dictionary" Version="2.7.0" />
         <PackageReference Include="Fody" Version="6.6.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -15,8 +15,8 @@
         <PackageReference Include="Google.Apis.Auth" Version="1.59.0" />
         <PackageReference Include="Google.Apis.Core" Version="1.59.0" />
         <PackageReference Include="MailKit" Version="3.4.3" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.3" />
-        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
         <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
     </ItemGroup>
 
