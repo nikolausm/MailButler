@@ -2,12 +2,11 @@ using System.Collections;
 
 namespace MailButler.MailRules.Filter;
 
-public sealed record IonosInvoiceFilter() : IFilters
+public sealed record IonosInvoiceFilter : IFilters
 {
 	private readonly IFilters _filter;
 
 	public IonosInvoiceFilter(string ionosAccountId)
-		: this()
 	{
 		_filter = new UnreadFilter()
 			.And(new HasAttachmentFilter())

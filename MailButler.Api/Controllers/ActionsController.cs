@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using MailButler.Api.BackgroundService;
 using MailButler.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,23 @@ public class ActionsController : ControllerBase
 		_backgroundServiceWorker = backgroundServiceWorker;
 	}
 
-	[HttpGet]
+	[HttpGet("")]
+	[ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	public IActionResult GetAllAsync()
+	{
+		Enum.GetValues<Action>()
+			.Where(item => item != Action.Unknown && item != Action.CurrentAction)
+			.ToList().ForEach(item =>
+			{
+				_logger.LogInformation("Adding {Action} to queue", item);
+				_backgroundServiceQueue.Enqueue(item);
+			});
+		
+		return Ok("Started all actions");
+	}
+
+	[HttpGet("{action}")]
 	[ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public IActionResult GetAsync(Action action, CancellationToken cancellationToken)

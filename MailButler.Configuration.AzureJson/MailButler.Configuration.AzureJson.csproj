@@ -7,19 +7,21 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Azure.Core" Version="1.27.0" />
         <PackageReference Include="Fody" Version="6.6.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Azure.Storage.Blobs" Version="12.14.1"/>
-        <PackageReference Include="Extensions.Dictionary" Version="2.2.6"/>
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0"/>
-        <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All"/>
+        <PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
+        <PackageReference Include="Extensions.Dictionary" Version="2.2.6" />
+        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+        <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MailButler.Configuration\MailButler.Configuration.csproj"/>
+        <ProjectReference Include="..\MailButler.Configuration\MailButler.Configuration.csproj" />
     </ItemGroup>
 
     <ItemGroup>

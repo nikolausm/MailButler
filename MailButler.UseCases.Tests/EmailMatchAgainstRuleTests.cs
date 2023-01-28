@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using FluentAssertions;
 using MailButler.Dtos;
 using MailButler.MailRules.Filter;

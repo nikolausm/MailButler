@@ -47,7 +47,7 @@ public sealed class EmailsSummaryRequestHandler: IRequestHandler<EmailsSummaryRe
 			return sb.ToString();
 		}
 		
-		sb.Append("<h2>Deleted Emails</h2>");
+		sb.Append("<h2>Emails</h2>");
 		sb.Append("<p><li>");
 		sb.AppendJoin("</li><li>", requestEmails.Select(email => $"From: {email.Sender.Address} Subject: {email.Subject}"));
 		sb.Append("</li></p>");
@@ -65,7 +65,7 @@ public sealed class EmailsSummaryRequestHandler: IRequestHandler<EmailsSummaryRe
 			return sb.ToString();
 		}
 		
-		sb.AppendLine("Deleted Emails");
+		sb.AppendLine("Emails");
 		sb.AppendLine();
 
 		sb.AppendJoin("\r\n", requestEmails.Select(email => $" - From: {email.Sender.Address} Subject: {email.Subject}"));

@@ -12,10 +12,10 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Google.Apis.Auth" Version="1.58.0" />
+        <PackageReference Include="Google.Apis.Auth" Version="1.59.0" />
         <PackageReference Include="MailKit" Version="3.4.3" />
-        <PackageReference Include="Mediator.Abstractions" Version="2.0.29" />
-        <PackageReference Include="Mediator.SourceGenerator" Version="2.0.29">
+        <PackageReference Include="Mediator.Abstractions" Version="2.0.30" />
+        <PackageReference Include="Mediator.SourceGenerator" Version="2.0.30">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
