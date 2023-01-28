@@ -67,7 +67,7 @@ public sealed class MarkOldEmailsAsReadAction
 
 		await Task.WhenAll(markAsRead);
 
-		_logger.LogInformation("Deleted emails");
+		_logger.LogInformation("Marked emails as read");
 
 		#endregion
 

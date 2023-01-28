@@ -5,11 +5,10 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>7444ed2c-1530-4d27-ba50-f2268669fb12</UserSecretsId>
-        <AssemblyVersion>1.5.0</AssemblyVersion>
-        <FileVersion>1.5.0</FileVersion>
-        <PackageVersion>1.5.0</PackageVersion>
+        <AssemblyVersion>2.0.0</AssemblyVersion>
+        <FileVersion>2.0.0</FileVersion>
+        <PackageVersion>2.0.0</PackageVersion>
     </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Fody" Version="6.6.4">
             <PrivateAssets>all</PrivateAssets>
