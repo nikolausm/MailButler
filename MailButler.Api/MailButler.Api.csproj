@@ -17,11 +17,9 @@
         <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     </ItemGroup>
-
     <ItemGroup>
         <ProjectReference Include="..\MailButler.Configuration.AzureJson\MailButler.Configuration.AzureJson.csproj" />
         <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj" />
         <ProjectReference Include="..\MailButler.UseCases\MailButler.UseCases.csproj" />
     </ItemGroup>
-
 </Project>

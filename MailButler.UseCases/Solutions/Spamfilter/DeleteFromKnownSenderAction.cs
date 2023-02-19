@@ -80,7 +80,8 @@ public sealed class DeleteFromKnownSenderAction
 		
 		var summaryEmail = await _mediator.Send(new EmailsSummaryRequest
 			{
-				Emails = tasks.SelectMany(task => task.Result.Result).ToList()
+				Emails = tasks.SelectMany(task => task.Result.Result).ToList(),
+				Subject = "Spamfilter Summary"
 			}, cancellationToken
 		);
 
