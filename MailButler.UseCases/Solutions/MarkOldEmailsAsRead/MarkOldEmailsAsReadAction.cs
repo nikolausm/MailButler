@@ -43,12 +43,12 @@ public sealed class MarkOldEmailsAsReadAction
 		await Task.WhenAll(tasks);
 
 		_logger.LogInformation(
-			"Found {EmailCount} emails to delete",
+			"Found {EmailCount} emails to be read",
 			tasks.Sum(t => t.Result.Result.Count)
 		);
 
 		foreach (var email in tasks.SelectMany(task => task.Result.Result))
-			_logger.LogDebug("Deleting email: {Email}", email);
+			_logger.LogDebug("Email: {Email}", email);
 
 		#endregion
 
@@ -106,9 +106,11 @@ public sealed class MarkOldEmailsAsReadAction
 
 		SearchQuery? emails = null;
 		foreach (var email in request.SenderAddresses)
+		{
 			emails = emails is null
 				? SearchQuery.FromContains(email)
 				: emails.Or(SearchQuery.FromContains(email));
+		}
 
 		return dateSearch
 			.And(SearchQuery.NotSeen)

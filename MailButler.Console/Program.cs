@@ -54,7 +54,8 @@ using (var _ = logger.BeginScope("AmazonOrderSummaryAction =>"))
 				MarkEmailAsRead = options.AmazonOrderSummaryAction.MarkEmailAsRead,
 				EvenIfAllEmailsAreRead = options.AmazonOrderSummaryAction.EvenIfAllEmailsAreRead,
 				DateTime = options.AmazonOrderSummaryAction.LastRun,
-				DaysToCheck = options.AmazonOrderSummaryAction.DaysToCheck
+				DaysToCheck = options.AmazonOrderSummaryAction.DaysToCheck,
+				Accounts = options.Accounts
 			}, tokenSource.Token
 		);
 	logger.LogInformation("Finished run for {Date:yyyy-MM-dd}", DateTime.Today);

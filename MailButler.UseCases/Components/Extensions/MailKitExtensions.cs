@@ -7,7 +7,7 @@ namespace MailButler.UseCases.Components.Extensions;
 
 public static class MailKitExtensions
 {
-	public static Email ToEmail(this MimeMessage message, MessageFlags summary, UniqueId id, Guid accountId)
+	public static Email ToEmail(this MimeMessage message, MessageFlags flags, UniqueId id, Guid accountId)
 	{
 		return new Email
 		{
@@ -31,11 +31,11 @@ public static class MailKitExtensions
 				Address = x.Address
 			}).ToList(),
 
-			IsRead = summary.HasFlag(MessageFlags.Seen),
+			IsRead = flags.HasFlag(MessageFlags.Seen),
 			Sent = message.Date.DateTime,
-			Subject = message.Subject,
-			HtmlBody = message.HtmlBody,
-			TextBody = message.TextBody
+			Subject = message.Subject ?? "",
+			HtmlBody = message.HtmlBody ?? "",
+			TextBody = message.TextBody ?? ""
 		};
 	}
 }

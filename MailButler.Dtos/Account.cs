@@ -7,6 +7,7 @@ public sealed record Account
 	public string? Password { get; init; }
 	public string? ImapServer { get; init; }
 	public int ImapPort { get; init; } = 0;
+	public string? FolderUrl { get; init; } = "https://outlook.office365.com/owa/";
 	public string? ClientId { get; init; }
 	public string? ClientSecret { get; init; }
 	public AccountType Type { get; init; } = AccountType.None;

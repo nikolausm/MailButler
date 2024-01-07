@@ -16,7 +16,6 @@ public sealed class BackgroundServiceWorker : Microsoft.Extensions.Hosting.Backg
 	private readonly IOptions<MailButlerOptions> _mailButlerOptions;
 	private readonly BackgroundServiceQueue _queue;
 
-
 	public BackgroundServiceWorker(
 		IServiceScopeFactory factory,
 		ILogger<BackgroundServiceWorker> logger,

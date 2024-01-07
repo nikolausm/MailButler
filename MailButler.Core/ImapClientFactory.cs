@@ -1,8 +1,10 @@
+using System.Net;
 using Extensions.Dictionary;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Util;
 using Google.Apis.Util.Store;
+using MailButler.Core.Exchange;
 using MailButler.Dtos;
 using MailKit.Net.Imap;
 using MailKit.Security;
@@ -12,19 +14,23 @@ namespace MailButler.Core;
 
 public sealed class ImapClientFactory : IImapClientFactory
 {
+	private readonly ILoggerFactory _loggerFactory;
 	private readonly ILogger<ImapClientFactory> _logger;
 
-	public ImapClientFactory(ILogger<ImapClientFactory> logger)
+	public ImapClientFactory(ILogger<ImapClientFactory> logger, ILoggerFactory loggerFactory)
 	{
+		_loggerFactory = loggerFactory;
 		_logger = logger;
 	}
 
-	public async Task<ImapClient> ImapClientAsync(Account account, CancellationToken cancellationToken)
+	public async Task<IImapClient> ImapClientAsync(Account account, CancellationToken cancellationToken)
 	{
 		switch (account.Type)
 		{
+			case AccountType.Exchange:
+				return await ConnectAndAuthenticateExchangeAsync(cancellationToken, account);
 			case AccountType.OAuth2:
-				return await ConnectAndAuthenticateOAuth2Async(cancellationToken, account);
+				return await ConnectAndAuthenticateOAuth2GoogleAsync(cancellationToken, account);
 			case AccountType.Imap:
 				return await ConnectAndAuthenticateAsync(cancellationToken, account);
 			case AccountType.None:
@@ -40,7 +46,37 @@ public sealed class ImapClientFactory : IImapClientFactory
 		}
 	}
 
-	private static async Task<ImapClient> ConnectAndAuthenticateOAuth2Async(
+	private async Task<IImapClient> ConnectAndAuthenticateExchangeAsync(CancellationToken cancellationToken,
+		Account account)
+	{
+		if (string.IsNullOrEmpty(account.Password))
+		{
+			throw new InvalidOperationException("Password is not set for Exchange account");
+		}
+
+		if (string.IsNullOrEmpty(account.FolderUrl))
+		{
+			throw new InvalidOperationException("FolderUrl is not set for Exchange account");
+		}
+
+		if (string.IsNullOrEmpty(account.Username))
+		{
+			throw new InvalidOperationException("Username is not set for Exchange account");
+		}
+
+		var client = new ExchangeImapClient(
+			_loggerFactory.CreateLogger<ExchangeImapClient>(),
+			account.Username,
+			account.Password,
+			account.FolderUrl
+		);
+
+		await client.AuthenticateAsync(new NetworkCredential(account.Username, account.Password), cancellationToken);
+
+		return client;
+	}
+
+	private static async Task<IImapClient> ConnectAndAuthenticateOAuth2GoogleAsync(
 		CancellationToken cancellationToken,
 		Account account
 	)
@@ -51,27 +87,30 @@ public sealed class ImapClientFactory : IImapClientFactory
 			ClientSecret = account.ClientSecret
 		};
 
-		GoogleAuthorizationCodeFlow codeFlow = new(new GoogleAuthorizationCodeFlow.Initializer
-		{
-			DataStore = new FileDataStore("CredentialCacheFolder"),
-			Scopes = new[] { "https://mail.google.com/" },
-			ClientSecrets = clientSecrets
-		});
-
-// Note: For a web app, you'll want to use AuthorizationCodeWebApp instead.
+		GoogleAuthorizationCodeFlow codeFlow = new(
+			new GoogleAuthorizationCodeFlow.Initializer
+			{
+				DataStore = new FileDataStore("CredentialCacheFolder"),
+				Scopes = new[] { "https://mail.google.com/" },
+				ClientSecrets = clientSecrets
+			}
+		);
+		// Note: For a web app, you'll want to use AuthorizationCodeWebApp instead.
 		var codeReceiver = new LocalServerCodeReceiver();
 		var authCode = new AuthorizationCodeInstalledApp(codeFlow, codeReceiver);
 
 		var credential = await authCode.AuthorizeAsync(account.Username, cancellationToken);
 
 		if (credential.Token.IsExpired(SystemClock.Default))
+		{
 			await credential.RefreshTokenAsync(cancellationToken);
+		}
 
 		var oauth2 = new SaslMechanismOAuth2(credential.UserId, credential.Token.AccessToken);
 
 		ImapClient client = new();
 
-		await client.ConnectAsync("imap.gmail.com", account.ImapPort, SecureSocketOptions.SslOnConnect,
+		await client.ConnectAsync(account.ImapServer, account.ImapPort, SecureSocketOptions.SslOnConnect,
 			cancellationToken);
 		await client.AuthenticateAsync(oauth2, cancellationToken);
 		return client;

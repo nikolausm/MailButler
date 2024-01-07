@@ -43,6 +43,11 @@ public sealed class AmazonOrderSummaryAction
 			_logger.LogError("Failed to get connections {Message}", checkConnectionsResponse.Message);
 			return;
 		}
+		if (checkConnectionsResponse.Result.Count == 0)
+		{
+			_logger.LogInformation("No connections found");
+			return;
+		}
 
 		#endregion
 
@@ -67,9 +72,8 @@ public sealed class AmazonOrderSummaryAction
 				)
 			).ToList();
 
-		await Task.WhenAll(items);
-
-
+		await Task.WhenAll(items).ConfigureAwait(false);
+		
 		items.ForEach(
 			finishedTask =>
 			{

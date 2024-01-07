@@ -4,5 +4,6 @@ public enum AccountType
 {
 	None,
 	OAuth2,
-	Imap
+	Imap,
+	Exchange
 }

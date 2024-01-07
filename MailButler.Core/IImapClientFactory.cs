@@ -5,5 +5,5 @@ namespace MailButler.Core;
 
 public interface IImapClientFactory
 {
-	Task<ImapClient> ImapClientAsync(Account account, CancellationToken cancellationToken);
+	Task<IImapClient> ImapClientAsync(Account account, CancellationToken cancellationToken);
 }

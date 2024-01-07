@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using MailButler.Api.BackgroundService;
 using MailButler.Dtos;
 using Microsoft.AspNetCore.Mvc;

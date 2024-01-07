@@ -88,7 +88,9 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 
 		AppendSellerEmailsHtmlSummary(emailsWithOrders, htmlBody);
 		AppendOrderEmailsHtmlSummary(emailsWithOrders, htmlBody, accounts);
-
+		
+		htmlBody.AppendLine("<p>Mit freundlichen Grüßen</p>");
+		htmlBody.AppendLine("<p>MailButler</p>");
 		htmlBody.AppendLine($"<!-- Id: {EmailId} -->");
 		return htmlBody.ToString();
 	}
@@ -149,7 +151,7 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 				titleWritten = true;
 			}
 
-			htmlBody.AppendLine($"<h3>{order} <span>({accounts[orderEmails.First().Key.AccountId].Name})</span>:</h3>");
+			htmlBody.AppendLine($"<h3><a href=\"https://www.amazon.de/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID={order}\">{order}</a><span>({accounts[orderEmails.First().Key.AccountId].Name})</span>:</h3>");
 			if (orderEmails.Count > 1) htmlBody.AppendLine("<ol>");
 
 			htmlBody.AppendJoin(
@@ -173,6 +175,9 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 
 		AppendSellerEmailsTextSummary(emailsWithOrders, textBody);
 		AppendOrderEmailsTextSummary(emailsWithOrders, textBody, accounts);
+
+		textBody.AppendLine("Mit freundlichen Grüßen");
+		textBody.AppendLine("MailButler");
 
 		textBody.AppendLine("r\n\r\n\r\n\r\n");
 		textBody.AppendLine($"Id: {EmailId}");
