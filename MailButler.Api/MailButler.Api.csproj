@@ -1,25 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
         <UserSecretsId>7444ed2c-1530-4d27-ba50-f2268669fb12</UserSecretsId>
         <AssemblyVersion>2.0.0</AssemblyVersion>
         <FileVersion>2.0.0</FileVersion>
         <PackageVersion>2.0.0</PackageVersion>
     </PropertyGroup>
+
+
     <ItemGroup>
         <PackageReference Include="Fody" Version="6.8.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="NullGuard.Fody" Version="3.1.1" PrivateAssets="All" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="NullGuard.Fody" Version="3.1.1" PrivateAssets="All"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\MailButler.Configuration.AzureJson\MailButler.Configuration.AzureJson.csproj" />
-        <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj" />
-        <ProjectReference Include="..\MailButler.UseCases\MailButler.UseCases.csproj" />
+        <ProjectReference Include="..\MailButler.Configuration.AzureJson\MailButler.Configuration.AzureJson.csproj"/>
+        <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj"/>
+        <ProjectReference Include="..\MailButler.UseCases\MailButler.UseCases.csproj"/>
     </ItemGroup>
 </Project>

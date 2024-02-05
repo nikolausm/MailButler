@@ -13,17 +13,58 @@ internal sealed class ExchangeMessageSummary : IMessageSummary
 		_message = message;
 	}
 
-	public string ThreadId { get; }
-	public UniqueId UniqueId => new (UInt32.Parse(_message.Id.UniqueId));
-
-	public int Index => Int32.Parse(_message.Id.UniqueId);
-	public ulong? GMailMessageId { get; }
-	public ulong? GMailThreadId { get; }
-	public IList<string> GMailLabels { get; }
-
 	public MessageSummaryItems Items => MessageSummaryItems.Full;
 
 	public string EnvelopeId => _message.InternetMessageId;
+	public IList<UniqueId> UniqueIds => new[] { UniqueId };
+
+	public string[] InReplyTo => _message.InReplyTo.Split(' ');
+
+	public IList<string> FlagsList
+	{
+		get
+		{
+			var flags = new List<string>();
+
+			if (_message.Flag.FlagStatus == ItemFlagStatus.Flagged) flags.Add("\\Flagged");
+
+			if (_message.IsRead) flags.Add("\\Seen");
+
+			if (_message.InternetMessageId != null) flags.Add("\\MessageId");
+
+			if (_message.IsDraft) flags.Add("\\Draft");
+
+			if (_message.IsFromMe) flags.Add("\\FromMe");
+
+			if (_message.IsResend) flags.Add("\\Resend");
+
+			if (_message.IsSubmitted) flags.Add("\\Submitted");
+
+			if (_message.IsUnmodified) flags.Add("\\Unmodified");
+
+			if (_message.IsReadReceiptRequested) flags.Add("\\ReadReceiptRequested");
+
+			if (_message.IsDeliveryReceiptRequested) flags.Add("\\DeliveryReceiptRequested");
+
+			if (_message.IsDeliveryReceiptRequested) flags.Add("\\DeliveryReceiptRequested");
+
+			if (_message.IsReadReceiptRequested) flags.Add("\\ReadReceiptRequested");
+
+			if (_message.IsAssociated) flags.Add("\\Associated");
+
+			if (_message.IsSubmitted) flags.Add("\\Submitted");
+
+			return flags;
+		}
+	}
+
+	public string ThreadId { get; }
+	public UniqueId UniqueId => new(uint.Parse(_message.Id.UniqueId));
+
+	public int Index => int.Parse(_message.Id.UniqueId);
+	public ulong? GMailMessageId { get; }
+	public ulong? GMailThreadId { get; }
+	public IList<string> GMailLabels { get; }
 
 	public HeaderList Headers { get; }
 	public DateTimeOffset? InternalDate => _message.DateTimeReceived;
@@ -50,38 +91,25 @@ internal sealed class ExchangeMessageSummary : IMessageSummary
 		get
 		{
 			var flags = MessageFlags.None;
-				
-			if (_message.Flag.FlagStatus == ItemFlagStatus.Flagged)
-			{
-				flags |= MessageFlags.Flagged;
-			}
 
-			if (_message.IsRead)
-			{
-				flags |= MessageFlags.Seen;
-			}
+			if (_message.Flag.FlagStatus == ItemFlagStatus.Flagged) flags |= MessageFlags.Flagged;
+
+			if (_message.IsRead) flags |= MessageFlags.Seen;
 
 			if (_message.InternetMessageId != null)
-			{
 				// TODO: Check if this is correct
 				flags |= MessageFlags.Answered;
-			}
 
-			if (_message.IsDraft)
-			{
-				flags |= MessageFlags.Draft;
-			}
-				
+			if (_message.IsDraft) flags |= MessageFlags.Draft;
+
 			if (_message.IsFromMe
 			    || _message.IsResend
 			    || _message.IsSubmitted
 			    || _message.IsUnmodified
 			    || _message.IsReadReceiptRequested
 			    || _message.IsSubmitted)
-			{
 				// TODO: Check if this is correct
 				flags |= MessageFlags.UserDefined;
-			}
 
 			return flags;
 		}
@@ -89,15 +117,14 @@ internal sealed class ExchangeMessageSummary : IMessageSummary
 
 	public IReadOnlySet<string> Keywords => _message.Categories.ToHashSet();
 	public IReadOnlyList<Annotation> Annotations => new List<Annotation>();
-	public IList<UniqueId> UniqueIds => new[] { UniqueId };
 
 	public MessageIdList References
 	{
 		get
 		{
 			var result = new MessageIdList();
-				
-			if ( _message.References != null)
+
+			if (_message.References != null)
 				result.AddRange(_message.References.Split(' '));
 
 			return result;
@@ -105,87 +132,4 @@ internal sealed class ExchangeMessageSummary : IMessageSummary
 	}
 
 	public string EmailId => _message.InternetMessageId;
-
-	public string[] InReplyTo => _message.InReplyTo.Split(' ');
-
-	public IList<string> FlagsList
-	{
-		get
-		{
-				
-			var flags = new List<string>();
-				
-			if (_message.Flag.FlagStatus == ItemFlagStatus.Flagged)
-			{
-				flags.Add("\\Flagged");
-			}
-
-			if (_message.IsRead)
-			{
-				flags.Add("\\Seen");
-			}
-
-			if (_message.InternetMessageId != null)
-			{
-				flags.Add("\\MessageId");
-			}
-
-			if (_message.IsDraft)
-			{
-				flags.Add("\\Draft");
-			}
-				
-			if (_message.IsFromMe)
-			{
-				flags.Add("\\FromMe");
-			}
-				
-			if (_message.IsResend)
-			{
-				flags.Add("\\Resend");
-			}
-				
-			if (_message.IsSubmitted)
-			{
-				flags.Add("\\Submitted");
-			}
-				
-			if (_message.IsUnmodified)
-			{
-				flags.Add("\\Unmodified");
-			}
-				
-			if (_message.IsReadReceiptRequested)
-			{
-				flags.Add("\\ReadReceiptRequested");
-			}
-				
-			if (_message.IsDeliveryReceiptRequested)
-			{
-				flags.Add("\\DeliveryReceiptRequested");
-			}
-				
-			if (_message.IsDeliveryReceiptRequested)
-			{
-				flags.Add("\\DeliveryReceiptRequested");
-			}
-				
-			if (_message.IsReadReceiptRequested)
-			{
-				flags.Add("\\ReadReceiptRequested");
-			}
-				
-			if (_message.IsAssociated)
-			{
-				flags.Add("\\Associated");
-			}
-				
-			if (_message.IsSubmitted)
-			{
-				flags.Add("\\Submitted");
-			}
-				
-			return flags;
-		}
-	}
 }

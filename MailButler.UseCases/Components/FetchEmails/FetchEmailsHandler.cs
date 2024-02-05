@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using MailButler.Core;
 using MailButler.Dtos;
 using MailButler.UseCases.Components.Extensions;
@@ -39,8 +38,10 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 				_logger.LogTrace("Total messages: {TotalMessageCount}", source.Count);
 				_logger.LogTrace("Recent messages: {RecentMessageCount}", source.Recent);
 
-				//var res = await source.SearchAsync(SearchQuery.SubjectContains("vanvilla Duschsystem"));
-				IList<UniqueId> ids = await source.SearchAsync(
+				//var res = await source.SearchAsync(SearchQuery.SubjectContains("Xiwai"));
+				//var res = await source.SearchAsync(SearchQuery.FromContains("amazon"));
+				//var res = await source.SearchAsync(SearchQuery.ToContains("amazon-busines"));
+				var ids = await source.SearchAsync(
 					SearchQuery.SentSince(request.StartDate),
 					cancellationToken
 				)!;
@@ -57,9 +58,7 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 				for (var i = 0; i < ids.Count; i++)
 				{
 					if (i % 100 == 0 || i == ids.Count - 1)
-					{
 						_logger.LogTrace("Added Emails {Current}/{Count}", i + 1, ids.Count);
-					}
 
 					emails.Add(mimMessages[i].ToEmail(flagsInformation[i].Flags!.Value, ids[i], request.Account.Id));
 				}
@@ -100,14 +99,9 @@ public sealed class FetchEmailsHandler : IRequestHandler<FetchEmailsRequest, Fet
 			var message = await source.GetMessageAsync(id, cancellationToken);
 			messages.Add(message);
 			if (messages.Count % 100 == 0 || messages.Count == ids.Count)
-			{
 				_logger.LogTrace("Message {Current}/{Count} retrieved", messages.Count, ids.Count);
-			}
 
-			if (messages.Count == ids.Count)
-			{
-				break;
-			}
+			if (messages.Count == ids.Count) break;
 		}
 
 		return messages;

@@ -1,5 +1,4 @@
 using MailButler.Dtos;
-using MailButler.UseCases.Solutions.Spamfilter;
 
 namespace MailButler.Api.Options;
 

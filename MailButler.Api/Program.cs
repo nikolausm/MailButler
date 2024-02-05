@@ -7,6 +7,7 @@ using MailButler.UseCases.Components;
 using MailButler.UseCases.Components.Extensions.DependencyInjection;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using MailButler.UseCases.Solutions.ForwardToGetMyInvoices;
+using MailButler.UseCases.Solutions.MarkOldEmailsAsRead;
 using MailButler.UseCases.Solutions.Spamfilter;
 using Microsoft.OpenApi.Models;
 
@@ -24,7 +25,8 @@ var baseConfiguration = baseConfigurationBuilder
 
 var configuration = baseConfigurationBuilder
 	.AddAzureJson<MailButlerOptions>(
-		baseConfiguration["MailButler:AzureJson:ContainerRoot"] ?? throw new Exception("AzureJson:ContainerRoot is not set"),
+		baseConfiguration["MailButler:AzureJson:ContainerRoot"] ??
+		throw new Exception("AzureJson:ContainerRoot is not set"),
 		baseConfiguration["MailButler:AzureJson:FileName"] ?? throw new Exception("AzureJson:FileName is not set"),
 		"MailButler"
 	)

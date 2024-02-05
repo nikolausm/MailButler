@@ -43,6 +43,7 @@ public sealed class AmazonOrderSummaryAction
 			_logger.LogError("Failed to get connections {Message}", checkConnectionsResponse.Message);
 			return;
 		}
+
 		if (checkConnectionsResponse.Result.Count == 0)
 		{
 			_logger.LogInformation("No connections found");
@@ -73,7 +74,7 @@ public sealed class AmazonOrderSummaryAction
 			).ToList();
 
 		await Task.WhenAll(items).ConfigureAwait(false);
-		
+
 		items.ForEach(
 			finishedTask =>
 			{
@@ -103,6 +104,7 @@ public sealed class AmazonOrderSummaryAction
 					"\\d{3}-\\d{7}-\\d{7}"
 				)
 			}, cancellationToken);
+		
 		if (emailMatchAgainstRuleResponse.Status == Status.Failed)
 		{
 			_logger.LogError("Failed to get amazon order emails: {Message}", emailMatchAgainstRuleResponse.Message);

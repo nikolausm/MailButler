@@ -4,7 +4,7 @@ using Mediator;
 
 namespace MailButler.UseCases.Components.EmailsSummary;
 
-public sealed class EmailsSummaryRequestHandler: IRequestHandler<EmailsSummaryRequest, EmailsSummaryResponse>
+public sealed class EmailsSummaryRequestHandler : IRequestHandler<EmailsSummaryRequest, EmailsSummaryResponse>
 {
 	private readonly EmailBodyParts _emailBodyParts;
 
@@ -12,6 +12,7 @@ public sealed class EmailsSummaryRequestHandler: IRequestHandler<EmailsSummaryRe
 	{
 		_emailBodyParts = emailBodyParts;
 	}
+
 	public ValueTask<EmailsSummaryResponse> Handle(EmailsSummaryRequest request, CancellationToken cancellationToken)
 	{
 		try
@@ -38,7 +39,7 @@ public sealed class EmailsSummaryRequestHandler: IRequestHandler<EmailsSummaryRe
 
 	private string? CreateHtmlBody(List<Email> requestEmails)
 	{
-		StringBuilder sb = new (_emailBodyParts.HtmlStyle());
+		StringBuilder sb = new(_emailBodyParts.HtmlStyle());
 		sb.Append(_emailBodyParts.HtmlLogo());
 
 		if (requestEmails.Count == 0)
@@ -46,29 +47,31 @@ public sealed class EmailsSummaryRequestHandler: IRequestHandler<EmailsSummaryRe
 			sb.Append("<p>No emails to report.</p>");
 			return sb.ToString();
 		}
-		
+
 		sb.Append("<h2>Emails</h2>");
 		sb.Append("<p><li>");
-		sb.AppendJoin("</li><li>", requestEmails.Select(email => $"From: {email.Sender.Address} Subject: {email.Subject}"));
+		sb.AppendJoin("</li><li>",
+			requestEmails.Select(email => $"From: {email.Sender.Address} Subject: {email.Subject}"));
 		sb.Append("</li></p>");
-		
+
 		return sb.ToString();
 	}
 
 	private string? CreateTextBody(List<Email> requestEmails)
 	{
-		StringBuilder sb = new ();
-	
+		StringBuilder sb = new();
+
 		if (requestEmails.Count == 0)
 		{
 			sb.Append("No emails to report");
 			return sb.ToString();
 		}
-		
+
 		sb.AppendLine("Emails");
 		sb.AppendLine();
 
-		sb.AppendJoin("\r\n", requestEmails.Select(email => $" - From: {email.Sender.Address} Subject: {email.Subject}"));
+		sb.AppendJoin("\r\n",
+			requestEmails.Select(email => $" - From: {email.Sender.Address} Subject: {email.Subject}"));
 		return sb.ToString();
 	}
 }

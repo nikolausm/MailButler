@@ -11,23 +11,20 @@ public static class MessageSummaryItemsExtensions
 		foreach (var value in Enum.GetValues(typeof(MessageSummaryItems)))
 		{
 			// If the value is not selected, skip it
-			if (!origin.HasFlag((MessageSummaryItems)value))
-			{
-				continue;
-			}
-				
+			if (!origin.HasFlag((MessageSummaryItems)value)) continue;
+
 			// If the value is selected, add it to the result
 			yield return value switch
 			{
-				MessageSummaryItems.UniqueId => EmailMessageSchema.Id,
-				MessageSummaryItems.Envelope => EmailMessageSchema.InternetMessageHeaders,
-				MessageSummaryItems.BodyStructure => EmailMessageSchema.MimeContent,
-				MessageSummaryItems.InternalDate => EmailMessageSchema.DateTimeReceived,
-				MessageSummaryItems.Size => EmailMessageSchema.Size,
-				MessageSummaryItems.Flags => EmailMessageSchema.Flag,
+				MessageSummaryItems.UniqueId => ItemSchema.Id,
+				MessageSummaryItems.Envelope => ItemSchema.InternetMessageHeaders,
+				MessageSummaryItems.BodyStructure => ItemSchema.MimeContent,
+				MessageSummaryItems.InternalDate => ItemSchema.DateTimeReceived,
+				MessageSummaryItems.Size => ItemSchema.Size,
+				MessageSummaryItems.Flags => ItemSchema.Flag,
 				MessageSummaryItems.GMailMessageId => EmailMessageSchema.InternetMessageId,
 				MessageSummaryItems.GMailThreadId => EmailMessageSchema.InternetMessageId,
-				MessageSummaryItems.GMailLabels => EmailMessageSchema.Categories,
+				MessageSummaryItems.GMailLabels => ItemSchema.Categories,
 				_ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
 			};
 		}

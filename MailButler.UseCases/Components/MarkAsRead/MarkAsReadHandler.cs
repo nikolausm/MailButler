@@ -42,7 +42,8 @@ public sealed class MarkAsReadHandler : IRequestHandler<MarkAsReadRequest, MarkA
 		}
 	}
 
-	private static async Task SeenFlagAsync(MarkAsReadRequest request, CancellationToken cancellationToken, IImapClient client)
+	private static async Task SeenFlagAsync(MarkAsReadRequest request, CancellationToken cancellationToken,
+		IImapClient client)
 	{
 		await client.Inbox.AddFlagsAsync(
 			request.Emails.Where(email => !email.IsRead)

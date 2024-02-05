@@ -8,9 +8,9 @@ namespace MailButler.UseCases.Components.Amazon.GetAmazonOrderSummary;
 public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrderEmailsSummaryRequest,
 	GetAmazonOrderEmailsSummaryResponse>
 {
-	private readonly EmailBodyParts _emailBodyParts;
 	private const string EmailId = "edae6e37-91c6-4103-b779-ad800107ad1c";
-	
+	private readonly EmailBodyParts _emailBodyParts;
+
 	private IList<Account> _accounts = new List<Account>();
 
 
@@ -18,6 +18,7 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 	{
 		_emailBodyParts = emailBodyParts;
 	}
+
 	public ValueTask<GetAmazonOrderEmailsSummaryResponse> Handle(
 		GetAmazonOrderEmailsSummaryRequest request,
 		CancellationToken cancellationToken)
@@ -77,7 +78,6 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 		};
 	}
 
-	
 
 	private string HtmlBody(Dictionary<Email, List<string>> emailsWithOrders)
 	{
@@ -88,7 +88,7 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 
 		AppendSellerEmailsHtmlSummary(emailsWithOrders, htmlBody);
 		AppendOrderEmailsHtmlSummary(emailsWithOrders, htmlBody, accounts);
-		
+
 		htmlBody.AppendLine("<p>Mit freundlichen Grüßen</p>");
 		htmlBody.AppendLine("<p>MailButler</p>");
 		htmlBody.AppendLine($"<!-- Id: {EmailId} -->");
@@ -151,7 +151,8 @@ public class GetAmazonOrderEmailsSummaryHandler : IRequestHandler<GetAmazonOrder
 				titleWritten = true;
 			}
 
-			htmlBody.AppendLine($"<h3><a href=\"https://www.amazon.de/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID={order}\">{order}</a><span>({accounts[orderEmails.First().Key.AccountId].Name})</span>:</h3>");
+			htmlBody.AppendLine(
+				$"<h3><a href=\"https://www.amazon.de/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID={order}\">{order}</a><span>({accounts[orderEmails.First().Key.AccountId].Name})</span>:</h3>");
 			if (orderEmails.Count > 1) htmlBody.AppendLine("<ol>");
 
 			htmlBody.AppendJoin(

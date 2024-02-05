@@ -22,7 +22,8 @@ public sealed class SearchEmailsHandler : IRequestHandler<SearchEmailsRequest, S
 		_logger = logger;
 	}
 
-	public async ValueTask<SearchEmailsResponse> Handle(SearchEmailsRequest request, CancellationToken cancellationToken)
+	public async ValueTask<SearchEmailsResponse> Handle(SearchEmailsRequest request,
+		CancellationToken cancellationToken)
 	{
 		List<Email> emails = new();
 		try

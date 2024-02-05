@@ -28,15 +28,15 @@ public sealed class DeleteFromKnownSenderAction
 		#region Getting emails
 
 		var tasks = request.Accounts.Select(
-			account => _mediator.Send(
-				new SearchEmailsRequest
-				{
-					Account = account,
-					Query = BuildSearchQuery(request)
-				},
-				cancellationToken
-			)
-		).Select(t => t.AsTask())
+				account => _mediator.Send(
+					new SearchEmailsRequest
+					{
+						Account = account,
+						Query = BuildSearchQuery(request)
+					},
+					cancellationToken
+				)
+			).Select(t => t.AsTask())
 			.ToList();
 
 		await Task.WhenAll(tasks);
@@ -56,18 +56,18 @@ public sealed class DeleteFromKnownSenderAction
 		if (request.DeleteEmails)
 		{
 			var deleteTasks = request.Accounts.Select(account =>
-				_mediator.Send(
-					new DeleteEmailsRequest
-					{
-						Account = account,
-						Emails = tasks
-							.SelectMany(t => t.Result.Result)
-							.Where(e => e.AccountId == account.Id).ToList()
-					}
-					, cancellationToken)
-			).Select(t => t.AsTask())
+					_mediator.Send(
+						new DeleteEmailsRequest
+						{
+							Account = account,
+							Emails = tasks
+								.SelectMany(t => t.Result.Result)
+								.Where(e => e.AccountId == account.Id).ToList()
+						}
+						, cancellationToken)
+				).Select(t => t.AsTask())
 				.ToList();
-			
+
 			await Task.WhenAll(deleteTasks);
 
 			_logger.LogInformation("Deleted emails");
@@ -76,8 +76,9 @@ public sealed class DeleteFromKnownSenderAction
 		#endregion
 
 		#region Send Summary Email
+
 		// Send summary email
-		
+
 		var summaryEmail = await _mediator.Send(new EmailsSummaryRequest
 			{
 				Emails = tasks.SelectMany(task => task.Result.Result).ToList(),
@@ -94,9 +95,7 @@ public sealed class DeleteFromKnownSenderAction
 		);
 
 		if (sendEmailResponse.Status == Status.Failed)
-		{
 			_logger.LogError("Failed to send summary email: {Message}", sendEmailResponse.Message);
-		}
 
 		#endregion
 	}

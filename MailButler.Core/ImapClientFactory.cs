@@ -14,8 +14,8 @@ namespace MailButler.Core;
 
 public sealed class ImapClientFactory : IImapClientFactory
 {
-	private readonly ILoggerFactory _loggerFactory;
 	private readonly ILogger<ImapClientFactory> _logger;
+	private readonly ILoggerFactory _loggerFactory;
 
 	public ImapClientFactory(ILogger<ImapClientFactory> logger, ILoggerFactory loggerFactory)
 	{
@@ -50,19 +50,13 @@ public sealed class ImapClientFactory : IImapClientFactory
 		Account account)
 	{
 		if (string.IsNullOrEmpty(account.Password))
-		{
 			throw new InvalidOperationException("Password is not set for Exchange account");
-		}
 
 		if (string.IsNullOrEmpty(account.FolderUrl))
-		{
 			throw new InvalidOperationException("FolderUrl is not set for Exchange account");
-		}
 
 		if (string.IsNullOrEmpty(account.Username))
-		{
 			throw new InvalidOperationException("Username is not set for Exchange account");
-		}
 
 		var client = new ExchangeImapClient(
 			_loggerFactory.CreateLogger<ExchangeImapClient>(),
@@ -101,10 +95,7 @@ public sealed class ImapClientFactory : IImapClientFactory
 
 		var credential = await authCode.AuthorizeAsync(account.Username, cancellationToken);
 
-		if (credential.Token.IsExpired(SystemClock.Default))
-		{
-			await credential.RefreshTokenAsync(cancellationToken);
-		}
+		if (credential.Token.IsExpired(SystemClock.Default)) await credential.RefreshTokenAsync(cancellationToken);
 
 		var oauth2 = new SaslMechanismOAuth2(credential.UserId, credential.Token.AccessToken);
 

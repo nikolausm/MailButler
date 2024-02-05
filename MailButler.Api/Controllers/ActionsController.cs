@@ -23,8 +23,8 @@ public sealed class ActionsController : ControllerBase
 		_backgroundServiceQueue = backgroundServiceQueue;
 		_backgroundServiceWorker = backgroundServiceWorker;
 	}
-	
-	
+
+
 	[HttpGet]
 	[ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -37,8 +37,8 @@ public sealed class ActionsController : ControllerBase
 			{
 				case Action.All:
 					Enum.GetValues<Action>()
-						.Where(item => 
-							item != Action.Unknown 
+						.Where(item =>
+							item != Action.Unknown
 							&& item != Action.CurrentAction
 							&& item != Action.All
 						)

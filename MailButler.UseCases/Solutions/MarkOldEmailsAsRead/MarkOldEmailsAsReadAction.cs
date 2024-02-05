@@ -1,5 +1,4 @@
 using MailButler.Dtos;
-using MailButler.UseCases.Components.DeleteEmails;
 using MailButler.UseCases.Components.EmailsSummary;
 using MailButler.UseCases.Components.MarkAsRead;
 using MailButler.UseCases.Components.SearchEmails;
@@ -8,7 +7,7 @@ using MailKit.Search;
 using Mediator;
 using Microsoft.Extensions.Logging;
 
-namespace MailButler.UseCases.Solutions.Spamfilter;
+namespace MailButler.UseCases.Solutions.MarkOldEmailsAsRead;
 
 public sealed class MarkOldEmailsAsReadAction
 {
@@ -91,9 +90,7 @@ public sealed class MarkOldEmailsAsReadAction
 		);
 
 		if (sendEmailResponse.Status == Status.Failed)
-		{
 			_logger.LogError("Failed to send summary email: {Message}", sendEmailResponse.Message);
-		}
 
 		#endregion
 	}
@@ -106,11 +103,9 @@ public sealed class MarkOldEmailsAsReadAction
 
 		SearchQuery? emails = null;
 		foreach (var email in request.SenderAddresses)
-		{
 			emails = emails is null
 				? SearchQuery.FromContains(email)
 				: emails.Or(SearchQuery.FromContains(email));
-		}
 
 		return dateSearch
 			.And(SearchQuery.NotSeen)

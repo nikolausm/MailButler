@@ -25,7 +25,8 @@ public sealed class ForwardEmailsHandler : IRequestHandler<ForwardEmailsRequest,
 		_smtpClientFactory = smtpClientFactory;
 	}
 
-	public async ValueTask<ForwardEmailsResponse> Handle(ForwardEmailsRequest request, CancellationToken cancellationToken)
+	public async ValueTask<ForwardEmailsResponse> Handle(ForwardEmailsRequest request,
+		CancellationToken cancellationToken)
 	{
 		List<Email> emails = new();
 		try

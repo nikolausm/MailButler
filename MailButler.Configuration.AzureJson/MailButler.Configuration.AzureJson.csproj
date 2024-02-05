@@ -1,27 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Azure.Core" Version="1.27.0" />
+        <PackageReference Include="Azure.Core" Version="1.37.0"/>
         <PackageReference Include="Fody" Version="6.8.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
-        <PackageReference Include="Extensions.Dictionary" Version="2.7.0" />
-        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-        <PackageReference Include="NullGuard.Fody" Version="3.1.1" PrivateAssets="All" />
+        <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1"/>
+        <PackageReference Include="Extensions.Dictionary" Version="2.8.0"/>
+        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0"/>
+        <PackageReference Include="NullGuard.Fody" Version="3.1.1" PrivateAssets="All"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MailButler.Configuration\MailButler.Configuration.csproj" />
+        <ProjectReference Include="..\MailButler.Configuration\MailButler.Configuration.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

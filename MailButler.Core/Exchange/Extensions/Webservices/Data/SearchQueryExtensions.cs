@@ -10,27 +10,14 @@ public static class SearchQueryExtensions
 	public static SearchFilter ToExchangeSearchFilter(this SearchQuery origin)
 	{
 		string textValue = null;
-		if (origin is TextSearchQuery textSearchQuery)
-		{
-			textValue = textSearchQuery.Text;
-		}
+		if (origin is TextSearchQuery textSearchQuery) textValue = textSearchQuery.Text;
 
-		if (origin is FilterSearchQuery filterSearchQuery)
-		{
-			textValue = filterSearchQuery.Name;
-		}
+		if (origin is FilterSearchQuery filterSearchQuery) textValue = filterSearchQuery.Name;
 
-		if (origin is HeaderSearchQuery headerSearchQuery)
-		{
-			textValue = headerSearchQuery.Value;
-		}
+		if (origin is HeaderSearchQuery headerSearchQuery) textValue = headerSearchQuery.Value;
 
-		if (origin is DateSearchQuery dateSearchQuery)
-		{
-			textValue = dateSearchQuery.Date.ToString("yyyy-MM-dd");
-		}
+		if (origin is DateSearchQuery dateSearchQuery) textValue = dateSearchQuery.Date.ToString("yyyy-MM-dd");
 		if (origin is BinarySearchQuery binarySearchQuery)
-		{
 			return new SearchFilter.SearchFilterCollection(
 				binarySearchQuery.Term == SearchTerm.And
 					? LogicalOperator.And
@@ -38,7 +25,6 @@ public static class SearchQueryExtensions
 				binarySearchQuery.Left.ToExchangeSearchFilter(),
 				binarySearchQuery.Right.ToExchangeSearchFilter()
 			);
-		}
 
 		switch (origin.Term)
 		{
@@ -82,7 +68,7 @@ public static class SearchQueryExtensions
 			case SearchTerm.Younger:
 				return new SearchFilter.IsLessThanOrEqualTo(ItemSchema.DateTimeReceived, textValue);
 			case SearchTerm.Uid when origin is UidSearchQuery uidSearchQuery:
-				SearchFilter[] items = uidSearchQuery.Uids
+				var items = uidSearchQuery.Uids
 					.ToList()
 					.ConvertAll(uid =>
 						(SearchFilter)new SearchFilter.IsEqualTo(EmailMessageSchema.InternetMessageId, uid))

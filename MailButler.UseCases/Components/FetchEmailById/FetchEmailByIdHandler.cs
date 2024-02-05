@@ -23,7 +23,8 @@ public sealed class FetchEmailByIdHandler : IRequestHandler<FetchEmailByIdReques
 		_logger = logger;
 	}
 
-	public async ValueTask<FetchEmailByIdResponse> Handle(FetchEmailByIdRequest request, CancellationToken cancellationToken)
+	public async ValueTask<FetchEmailByIdResponse> Handle(FetchEmailByIdRequest request,
+		CancellationToken cancellationToken)
 	{
 		try
 		{

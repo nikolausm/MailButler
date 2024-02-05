@@ -1,7 +1,6 @@
 using MailButler.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Mediator;
 
 namespace MailButler.UseCases.Components.Extensions.DependencyInjection;
 

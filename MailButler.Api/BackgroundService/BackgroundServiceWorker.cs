@@ -2,6 +2,7 @@ using MailButler.Api.Options;
 using MailButler.UseCases.Components.CheckConnections;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using MailButler.UseCases.Solutions.ForwardToGetMyInvoices;
+using MailButler.UseCases.Solutions.MarkOldEmailsAsRead;
 using MailButler.UseCases.Solutions.Spamfilter;
 using Mediator;
 using Microsoft.Extensions.Options;
@@ -20,8 +21,7 @@ public sealed class BackgroundServiceWorker : Microsoft.Extensions.Hosting.Backg
 		IServiceScopeFactory factory,
 		ILogger<BackgroundServiceWorker> logger,
 		BackgroundServiceQueue queue,
-		IOptions<MailButlerOptions> mailButlerOptions,
-		IConfiguration configuration
+		IOptions<MailButlerOptions> mailButlerOptions
 	)
 	{
 		_factory = factory;
@@ -64,8 +64,8 @@ public sealed class BackgroundServiceWorker : Microsoft.Extensions.Hosting.Backg
 					await mediator.Send(new CheckConnectionsRequest
 					{
 						Accounts = _mailButlerOptions.Value.Accounts
-					});
-				break;
+					}, stoppingToken);
+					break;
 				case Action.AmazonOrderSummary:
 					var amazonOrderSummaryActionOptions = _mailButlerOptions.Value.AmazonOrderSummaryAction;
 					await scope.ServiceProvider
@@ -101,12 +101,12 @@ public sealed class BackgroundServiceWorker : Microsoft.Extensions.Hosting.Backg
 					break;
 				case Action.MarkOldEmailAsRead:
 
-					MarkOldEmailsAsReadOptions markOldEmailsAsReadOptions =
+					var markOldEmailsAsReadOptions =
 						_mailButlerOptions.Value.MarkOldEmailsAsRead;
 					await scope.ServiceProvider
 						.GetRequiredService<MarkOldEmailsAsReadAction>()
 						.ExecuteAsync(
-							new MarkOldEmailsAsReadRequest()
+							new MarkOldEmailsAsReadRequest
 							{
 								SenderAddresses = markOldEmailsAsReadOptions.SenderAddresses,
 								SmtpAccount = markOldEmailsAsReadOptions.SmtpAccount,

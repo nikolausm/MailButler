@@ -15,7 +15,8 @@ public sealed class DeleteEmailsHandler : IRequestHandler<DeleteEmailsRequest, D
 		_clientFactory = clientFactory;
 	}
 
-	public async ValueTask<DeleteEmailsResponse> Handle(DeleteEmailsRequest request, CancellationToken cancellationToken)
+	public async ValueTask<DeleteEmailsResponse> Handle(DeleteEmailsRequest request,
+		CancellationToken cancellationToken)
 	{
 		try
 		{

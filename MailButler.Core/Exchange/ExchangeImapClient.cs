@@ -17,16 +17,16 @@ namespace MailButler.Core.Exchange;
 
 public sealed class ExchangeImapClient : IImapClient
 {
+	private readonly CancellationTokenSource _cancellationTokenSource = new();
 	private readonly ILogger<ExchangeImapClient> _logger;
-	private readonly string _username;
 	private readonly string _password;
 	private readonly string _serverUrl;
 	private readonly ExchangeService _service;
-	private readonly CancellationTokenSource _cancellationTokenSource = new();
+	private readonly string _username;
 	private string? _host;
-	private int _port;
-	private SecureSocketOptions? _options;
 	private IMailFolder? _inbox;
+	private SecureSocketOptions? _options;
+	private int _port;
 
 	public ExchangeImapClient(ILogger<ExchangeImapClient> logger, string username, string password, string serverUrl,
 		ExchangeVersion exchangeVersion = ExchangeVersion.Exchange2013_SP1)
@@ -42,12 +42,14 @@ public sealed class ExchangeImapClient : IImapClient
 
 	public void Connect(string host, int port, bool useSsl, CancellationToken cancellationToken = new())
 	{
-		Connect(host, port, useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTlsWhenAvailable, cancellationToken);
+		Connect(host, port, useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTlsWhenAvailable,
+			cancellationToken);
 	}
 
 	public async Task ConnectAsync(string host, int port, bool useSsl, CancellationToken cancellationToken = new())
 	{
-		await ConnectAsync(host, port, useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTlsWhenAvailable, cancellationToken);
+		await ConnectAsync(host, port,
+			useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTlsWhenAvailable, cancellationToken);
 	}
 
 	public void Connect(string host, int port, SecureSocketOptions options, CancellationToken cancellationToken)
@@ -63,25 +65,29 @@ public sealed class ExchangeImapClient : IImapClient
 		return Task.CompletedTask;
 	}
 
-	public void Connect(Socket socket, string host, int port = 0, SecureSocketOptions options = SecureSocketOptions.Auto,
+	public void Connect(Socket socket, string host, int port = 0,
+		SecureSocketOptions options = SecureSocketOptions.Auto,
 		CancellationToken cancellationToken = default)
 	{
 		// No-op for Exchange implementation
 	}
 
-	public async Task ConnectAsync(Socket socket, string host, int port = 0, SecureSocketOptions options = SecureSocketOptions.Auto,
+	public async Task ConnectAsync(Socket socket, string host, int port = 0,
+		SecureSocketOptions options = SecureSocketOptions.Auto,
 		CancellationToken cancellationToken = default)
 	{
 		// No-op for Exchange implementation
 	}
 
-	public void Connect(Stream stream, string host, int port = 0, SecureSocketOptions options = SecureSocketOptions.Auto,
+	public void Connect(Stream stream, string host, int port = 0,
+		SecureSocketOptions options = SecureSocketOptions.Auto,
 		CancellationToken cancellationToken = default)
 	{
 		// No-op for Exchange implementation
 	}
 
-	public async Task ConnectAsync(Stream stream, string host, int port = 0, SecureSocketOptions options = SecureSocketOptions.Auto,
+	public async Task ConnectAsync(Stream stream, string host, int port = 0,
+		SecureSocketOptions options = SecureSocketOptions.Auto,
 		CancellationToken cancellationToken = new())
 	{
 		// No-op for Exchange implementation
@@ -94,7 +100,6 @@ public sealed class ExchangeImapClient : IImapClient
 
 	public async Task AuthenticateAsync(ICredentials credentials, CancellationToken cancellationToken = new())
 	{
-
 		await Task.Run(() => Authenticate(Encoding.UTF8, credentials, cancellationToken));
 	}
 
@@ -164,67 +169,6 @@ public sealed class ExchangeImapClient : IImapClient
 		return Task.CompletedTask;
 	}
 
-	public IMailFolder GetFolder(SpecialFolder folder, CancellationToken cancellationToken)
-	{
-		return folder switch
-		{
-			SpecialFolder.Trash => new ExchangeMailFolder(_service, WellKnownFolderName.DeletedItems),
-			SpecialFolder.Sent => new ExchangeMailFolder(_service, WellKnownFolderName.SentItems),
-			SpecialFolder.Drafts => new ExchangeMailFolder(_service, WellKnownFolderName.Drafts),
-			SpecialFolder.All => new ExchangeMailFolder(_service, WellKnownFolderName.MsgFolderRoot),
-			SpecialFolder.Archive => new ExchangeMailFolder(_service, WellKnownFolderName.ArchiveRoot),
-			SpecialFolder.Junk => new ExchangeMailFolder(_service, WellKnownFolderName.JunkEmail),
-			_ => throw new NotSupportedException()
-		};
-	}
-
-	public IList<IMailFolder> GetFolders(SpecialFolder folder, CancellationToken cancellationToken)
-	{
-		// No-op for Exchange implementation
-		return Array.Empty<IMailFolder>();
-	}
-
-	public Task<IList<IMailFolder>> GetFoldersAsync(SpecialFolder folder, CancellationToken cancellationToken)
-	{
-		// No-op for Exchange implementation
-		return Task.FromResult<IList<IMailFolder>>(new IMailFolder[0]);
-	}
-
-	public void Idle(CancellationToken cancellationToken)
-	{
-		var inbox = Folder.Bind(_service, WellKnownFolderName.Inbox);
-		var view = new ItemView(1);
-		var searchFilter = new SearchFilter.SearchFilterCollection(
-			LogicalOperator.And,
-			new SearchFilter.IsEqualTo(
-				EmailMessageSchema.IsRead, 
-				false
-			)
-		);
-		var count = inbox.FindItems(searchFilter, view).TotalCount;
-		while (!cancellationToken.IsCancellationRequested)
-		{
-			if (count > 0)
-			{
-				OnNewMessage();
-			}
-
-			// Should be an configuration option
-			Thread.Sleep(10000);
-			count = inbox.FindItems(searchFilter, view).TotalCount;
-		}
-	}
-
-	private void OnNewMessage()
-	{
-		NewMessage?.Invoke(this, EventArgs.Empty);
-	}
-
-	public Task IdleAsync(CancellationToken cancellationToken)
-	{
-		return Task.Run(() => Idle(cancellationToken), cancellationToken);
-	}
-
 	public void NoOp
 		(CancellationToken cancellationToken)
 	{
@@ -270,21 +214,6 @@ public sealed class ExchangeImapClient : IImapClient
 	public event EventHandler<DisconnectedEventArgs> Disconnected;
 	public event EventHandler<AuthenticatedEventArgs>? Authenticated;
 
-
-	public event EventHandler<EventArgs> NewMessage;
-
-	protected void OnDisconnected()
-	{
-		//Disconnected?.Invoke(this, new DisconnectedEventArgs());
-		Disconnected?.Invoke(this, new DisconnectedEventArgs(
-				_host,
-				_port,
-				_options ?? SecureSocketOptions.Auto,
-				true
-			)
-		);
-	}
-
 	public void EnableQuickResync(CancellationToken cancellationToken = new())
 	{
 		throw new NotImplementedException();
@@ -326,15 +255,12 @@ public sealed class ExchangeImapClient : IImapClient
 		// Bind to the folder using the current IMAP client instance
 		var folderName = Enum.GetName(typeof(SpecialFolder), folder);
 		var exchangeFolder = _service.FindFolders(wellKnownFolderName, new FolderView(100)).FirstOrDefault();
-		if (exchangeFolder == null)
-		{
-			throw new InvalidOperationException($"The {folder} folder could not be found.");
-		}
-		
+		if (exchangeFolder == null) throw new InvalidOperationException($"The {folder} folder could not be found.");
+
 		// Open the folder and return it
 		return new ExchangeMailFolder(_service, wellKnownFolderName);
 	}
-	
+
 
 	public IMailFolder GetFolder(FolderNamespace @namespace)
 	{
@@ -353,13 +279,15 @@ public sealed class ExchangeImapClient : IImapClient
 		throw new NotImplementedException();
 	}
 
-	public IList<IMailFolder> GetFolders(FolderNamespace @namespace, StatusItems items = StatusItems.None, bool subscribedOnly = false,
+	public IList<IMailFolder> GetFolders(FolderNamespace @namespace, StatusItems items = StatusItems.None,
+		bool subscribedOnly = false,
 		CancellationToken cancellationToken = new())
 	{
 		throw new NotImplementedException();
 	}
 
-	public async Task<IList<IMailFolder>> GetFoldersAsync(FolderNamespace @namespace, StatusItems items = StatusItems.None, bool subscribedOnly = false,
+	public async Task<IList<IMailFolder>> GetFoldersAsync(FolderNamespace @namespace,
+		StatusItems items = StatusItems.None, bool subscribedOnly = false,
 		CancellationToken cancellationToken = new())
 	{
 		throw new NotImplementedException();
@@ -390,7 +318,8 @@ public sealed class ExchangeImapClient : IImapClient
 		throw new NotImplementedException();
 	}
 
-	public async Task<MetadataCollection> GetMetadataAsync(IEnumerable<MetadataTag> tags, CancellationToken cancellationToken = new())
+	public async Task<MetadataCollection> GetMetadataAsync(IEnumerable<MetadataTag> tags,
+		CancellationToken cancellationToken = new())
 	{
 		throw new NotImplementedException();
 	}
@@ -428,6 +357,7 @@ public sealed class ExchangeImapClient : IImapClient
 	public event EventHandler<AlertEventArgs>? Alert;
 	public event EventHandler<FolderCreatedEventArgs>? FolderCreated;
 	public event EventHandler<MetadataChangedEventArgs>? MetadataChanged;
+
 	public void Compress(CancellationToken cancellationToken = new())
 	{
 		throw new NotImplementedException();
@@ -475,7 +405,8 @@ public sealed class ExchangeImapClient : IImapClient
 		throw new NotImplementedException();
 	}
 
-	public async Task NotifyAsync(bool status, IList<ImapEventGroup> eventGroups, CancellationToken cancellationToken = new())
+	public async Task NotifyAsync(bool status, IList<ImapEventGroup> eventGroups,
+		CancellationToken cancellationToken = new())
 	{
 		throw new NotImplementedException();
 	}
@@ -495,4 +426,77 @@ public sealed class ExchangeImapClient : IImapClient
 	public int InternationalizationLevel { get; }
 	public AccessRights Rights { get; }
 	public bool IsIdle { get; }
+
+	public IMailFolder GetFolder(SpecialFolder folder, CancellationToken cancellationToken)
+	{
+		return folder switch
+		{
+			SpecialFolder.Trash => new ExchangeMailFolder(_service, WellKnownFolderName.DeletedItems),
+			SpecialFolder.Sent => new ExchangeMailFolder(_service, WellKnownFolderName.SentItems),
+			SpecialFolder.Drafts => new ExchangeMailFolder(_service, WellKnownFolderName.Drafts),
+			SpecialFolder.All => new ExchangeMailFolder(_service, WellKnownFolderName.MsgFolderRoot),
+			SpecialFolder.Archive => new ExchangeMailFolder(_service, WellKnownFolderName.ArchiveRoot),
+			SpecialFolder.Junk => new ExchangeMailFolder(_service, WellKnownFolderName.JunkEmail),
+			_ => throw new NotSupportedException()
+		};
+	}
+
+	public IList<IMailFolder> GetFolders(SpecialFolder folder, CancellationToken cancellationToken)
+	{
+		// No-op for Exchange implementation
+		return Array.Empty<IMailFolder>();
+	}
+
+	public Task<IList<IMailFolder>> GetFoldersAsync(SpecialFolder folder, CancellationToken cancellationToken)
+	{
+		// No-op for Exchange implementation
+		return Task.FromResult<IList<IMailFolder>>(new IMailFolder[0]);
+	}
+
+	public void Idle(CancellationToken cancellationToken)
+	{
+		var inbox = Folder.Bind(_service, WellKnownFolderName.Inbox);
+		var view = new ItemView(1);
+		var searchFilter = new SearchFilter.SearchFilterCollection(
+			LogicalOperator.And,
+			new SearchFilter.IsEqualTo(
+				EmailMessageSchema.IsRead,
+				false
+			)
+		);
+		var count = inbox.FindItems(searchFilter, view).TotalCount;
+		while (!cancellationToken.IsCancellationRequested)
+		{
+			if (count > 0) OnNewMessage();
+
+			// Should be an configuration option
+			Thread.Sleep(10000);
+			count = inbox.FindItems(searchFilter, view).TotalCount;
+		}
+	}
+
+	private void OnNewMessage()
+	{
+		NewMessage?.Invoke(this, EventArgs.Empty);
+	}
+
+	public Task IdleAsync(CancellationToken cancellationToken)
+	{
+		return Task.Run(() => Idle(cancellationToken), cancellationToken);
+	}
+
+
+	public event EventHandler<EventArgs> NewMessage;
+
+	protected void OnDisconnected()
+	{
+		//Disconnected?.Invoke(this, new DisconnectedEventArgs());
+		Disconnected?.Invoke(this, new DisconnectedEventArgs(
+				_host,
+				_port,
+				_options ?? SecureSocketOptions.Auto,
+				true
+			)
+		);
+	}
 }

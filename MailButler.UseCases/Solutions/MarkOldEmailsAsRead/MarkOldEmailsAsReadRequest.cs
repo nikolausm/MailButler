@@ -1,6 +1,6 @@
 using MailButler.Dtos;
 
-namespace MailButler.UseCases.Solutions.Spamfilter;
+namespace MailButler.UseCases.Solutions.MarkOldEmailsAsRead;
 
 public sealed class MarkOldEmailsAsReadRequest
 {

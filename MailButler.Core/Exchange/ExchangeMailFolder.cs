@@ -5,15 +5,16 @@ using MailKit;
 using MailKit.Search;
 using Microsoft.Exchange.WebServices.Data;
 using MimeKit;
+using MimeContent = MimeKit.MimeContent;
 using Task = System.Threading.Tasks.Task;
 
 namespace MailButler.Core.Exchange;
 
 internal class ExchangeMailFolder : IMailFolder
 {
-	private readonly ExchangeService _service;
 	private readonly Lazy<Folder> _folder;
-	private IDictionary<UniqueId, EmailMessage> _fetcheItems;
+	private readonly ExchangeService _service;
+	private readonly IDictionary<UniqueId, EmailMessage> _fetcheItems;
 
 	public ExchangeMailFolder(ExchangeService service, WellKnownFolderName folderName)
 	{
@@ -21,6 +22,20 @@ internal class ExchangeMailFolder : IMailFolder
 		_folder = new Lazy<Folder>(() => Folder.Bind(service, new FolderId(folderName)));
 		_fetcheItems = new Dictionary<UniqueId, EmailMessage>();
 	}
+
+	public bool SupportsReadOnly => true;
+
+	public bool SupportsReadWrite => false;
+
+	public bool SupportsSetFlags => false;
+
+	public bool SupportsAddFlags => false;
+
+	public bool SupportsRemoveFlags => false;
+
+	public bool SupportsThreadableFlags => false;
+
+	public UniqueId? UniqueIdValidity => null;
 
 	public bool IsNamespace { get; }
 	public string FullName => _folder.Value.DisplayName;
@@ -67,28 +82,6 @@ internal class ExchangeMailFolder : IMailFolder
 	public uint? AppendLimit { get; }
 	public ulong? Size { get; }
 
-	public bool SupportsReadOnly => true;
-
-	public bool SupportsReadWrite => false;
-
-	public bool SupportsSetFlags => false;
-
-	public bool SupportsAddFlags => false;
-
-	public bool SupportsRemoveFlags => false;
-
-	public bool SupportsThreadableFlags => false;
-
-	public UniqueId? UniqueIdValidity => null;
-
-	public bool Equals(IMailFolder other)
-	{
-		if (other is null)
-			return false;
-
-		return Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase);
-	}
-
 	public bool Supports(FolderFeature feature)
 	{
 		throw new NotImplementedException();
@@ -116,16 +109,6 @@ internal class ExchangeMailFolder : IMailFolder
 	{
 		_folder.Value.Load();
 		return access;
-	}
-
-	public void Open(FolderAccess access, CancellationToken cancellationToken)
-	{
-		_folder.Value.Load();
-	}
-
-	public Task OpenAsync(FolderAccess access, CancellationToken cancellationToken)
-	{
-		return Task.Run(() => Open(access, cancellationToken), cancellationToken);
 	}
 
 	public void Close(bool expunge, CancellationToken cancellationToken)
@@ -406,78 +389,6 @@ internal class ExchangeMailFolder : IMailFolder
 		throw new NotImplementedException();
 	}
 
-	public void AddFlags(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
-	{
-		// No-op for Exchange implementation
-	}
-
-	public Task AddFlagsAsync(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
-	{
-		// No-op for Exchange implementation
-		return Task.CompletedTask;
-	}
-
-	public void RemoveFlags(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
-	{
-		// No-op for Exchange implementation
-	}
-
-	public Task RemoveFlagsAsync(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
-	{
-		// No-op for Exchange implementation
-		return Task.CompletedTask;
-	}
-
-	public void SetFlags(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
-	{
-		// No-op for Exchange implementation
-	}
-
-	public Task SetFlagsAsync(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
-	{
-		// No-op for Exchange implementation
-		return Task.CompletedTask;
-	}
-
-	public void ReplaceFlags(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
-	{
-		// No-op for Exchange implementation
-	}
-
-	public Task ReplaceFlagsAsync(IList<UniqueId> uids, ItemId messageId, MessageFlags flags,
-		CancellationToken cancellationToken)
-	{
-		// No-op for Exchange implementation
-		return Task.CompletedTask;
-	}
-
-	public IList<IMessageSummary> Fetch(int startIndex, int endIndex, MessageSummaryItems items,
-		CancellationToken cancellationToken)
-	{
-		var itemIds = new List<ItemId>();
-		for (var i = startIndex; i <= endIndex; i++)
-		{
-			itemIds.Add(_folder.Value.FindItems(new ItemView(1) { Offset = i - 1 }).Items[0].Id);
-		}
-
-		var propertySet = new PropertySet(items.ToExchangeProperties());
-		var result = new List<IMessageSummary>();
-		foreach (var item in itemIds)
-		{
-			result.Add(new ExchangeMessageSummary(
-				EmailMessage.Bind(_service, item, propertySet))
-			);
-		}
-
-		return result;
-	}
-
-	public Task<IList<IMessageSummary>> FetchAsync(int startIndex, int endIndex, MessageSummaryItems items,
-		CancellationToken cancellationToken)
-	{
-		return Task.Run(() => Fetch(startIndex, endIndex, items, cancellationToken), cancellationToken);
-	}
-
 	public async Task<IList<int>> StoreAsync(IList<int> indexes, ulong modseq, IList<Annotation> annotations,
 		CancellationToken cancellationToken = new())
 	{
@@ -487,11 +398,11 @@ internal class ExchangeMailFolder : IMailFolder
 	public IList<UniqueId> Search(SearchQuery query, CancellationToken cancellationToken)
 	{
 		var propSet = new PropertySet(BasePropertySet.IdOnly);
-		
-		var values =  _folder.Value
+
+		var values = _folder.Value
 			.FindItems(query.ToExchangeSearchFilter(), new ItemView(1))
 			.ToList()
-			.ConvertAll(result => new UniqueId(UInt32.Parse(result.Id.UniqueId)));
+			.ConvertAll(result => new UniqueId(uint.Parse(result.Id.UniqueId)));
 
 		return values;
 	}
@@ -830,7 +741,8 @@ internal class ExchangeMailFolder : IMailFolder
 
 	public async Task<IList<IMessageSummary>> FetchAsync(IList<UniqueId> uids, IFetchRequest request,
 		CancellationToken cancellationToken = new())
-		=> await
+	{
+		return await
 			Task.Run(() => uids
 					.Chunk(100)
 					.ToList()
@@ -838,6 +750,7 @@ internal class ExchangeMailFolder : IMailFolder
 					.ToList(),
 				cancellationToken
 			);
+	}
 
 	public IList<IMessageSummary> Fetch(IList<int> indexes, IFetchRequest request,
 		CancellationToken cancellationToken = new())
@@ -926,24 +839,21 @@ internal class ExchangeMailFolder : IMailFolder
 	{
 		// Fetch the message from the folder using the UID
 		var result = _folder.Value.FindItems(
-			new UidSearchQuery(uid).ToExchangeSearchFilter(), new ItemView(Int32.MaxValue)
+			new UidSearchQuery(uid).ToExchangeSearchFilter(), new ItemView(int.MaxValue)
 			// new SearchQuery(), new ItemView(Int32.MaxValue)
 			// new UidSearchQuery(uid), new ItemView(int.MaxValue)
 		);
 
 
 		// If the message is null or doesn't have a body, return null
-		if (result == null)
-		{
-			return null;
-		}
+		if (result == null) return null;
 
-		Item? message = result.Items.First();
+		var message = result.Items.First();
 
 		// Generate StreamContent from the message body
 		var mimePart = new MimePart(message.Body.BodyType == BodyType.Text ? "text/plain" : "text/html")
 		{
-			Content = new MimeKit.MimeContent(new MemoryStream(Encoding.UTF8.GetBytes(message.Body.Text))),
+			Content = new MimeContent(new MemoryStream(Encoding.UTF8.GetBytes(message.Body.Text))),
 			ContentTransferEncoding = ContentEncoding.Base64,
 			ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
 			FileName = "message.txt"
@@ -956,40 +866,6 @@ internal class ExchangeMailFolder : IMailFolder
 			message.Subject,
 			mimePart
 		);
-	}
-
-	private InternetAddress GetFromAddress(Item message)
-	{
-		return message switch
-		{
-			MeetingRequest meetingRequest => new MailboxAddress(
-				meetingRequest.Organizer.Name,
-				meetingRequest.Organizer.Address
-			),
-			EmailMessage emailMessage => new MailboxAddress(emailMessage.From.Name, emailMessage.From.Address),
-			PostItem postItem => new MailboxAddress(postItem.From.Name, postItem.From.Address),
-			_ => throw new NotImplementedException()
-		};
-	}
-
-
-	private IEnumerable<InternetAddress> GetToAddress(Item message)
-	{
-		return message switch
-		{
-			// Get From Address from Item
-			MeetingRequest meetingRequest => new List<InternetAddress>
-			{
-				new MailboxAddress(meetingRequest.Organizer.Name, meetingRequest.Organizer.Address),
-			},
-			EmailMessage emailMessage => emailMessage.ToRecipients
-				.Select(item => new MailboxAddress(item.Name, item.Address)),
-			PostItem postItem => new List<InternetAddress>
-			{
-				new MailboxAddress(postItem.From.Name, postItem.From.Address),
-			},
-			_ => throw new NotImplementedException(),
-		};
 	}
 
 
@@ -1031,6 +907,30 @@ internal class ExchangeMailFolder : IMailFolder
 		throw new NotImplementedException();
 	}
 
+	public Stream GetStream(UniqueId uid, CancellationToken cancellationToken = new(),
+		ITransferProgress progress = null)
+	{
+		throw new NotImplementedException();
+	}
+
+	public async Task<Stream> GetStreamAsync(UniqueId uid, CancellationToken cancellationToken = new(),
+		ITransferProgress progress = null)
+	{
+		throw new NotImplementedException();
+	}
+
+	public Stream GetStream(int index, CancellationToken cancellationToken = new(),
+		ITransferProgress progress = null)
+	{
+		throw new NotImplementedException();
+	}
+
+	public async Task<Stream> GetStreamAsync(int index, CancellationToken cancellationToken = new(),
+		ITransferProgress progress = null)
+	{
+		throw new NotImplementedException();
+	}
+
 	public Stream GetStream(UniqueId uid, int offset, int count, CancellationToken cancellationToken = new(),
 		ITransferProgress progress = null)
 	{
@@ -1052,6 +952,30 @@ internal class ExchangeMailFolder : IMailFolder
 
 	public async Task<Stream> GetStreamAsync(int index, int offset, int count,
 		CancellationToken cancellationToken = new(),
+		ITransferProgress progress = null)
+	{
+		throw new NotImplementedException();
+	}
+
+	public Stream GetStream(UniqueId uid, BodyPart part, CancellationToken cancellationToken = new(),
+		ITransferProgress progress = null)
+	{
+		throw new NotImplementedException();
+	}
+
+	public async Task<Stream> GetStreamAsync(UniqueId uid, BodyPart part, CancellationToken cancellationToken = new(),
+		ITransferProgress progress = null)
+	{
+		throw new NotImplementedException();
+	}
+
+	public Stream GetStream(int index, BodyPart part, CancellationToken cancellationToken = new(),
+		ITransferProgress progress = null)
+	{
+		throw new NotImplementedException();
+	}
+
+	public async Task<Stream> GetStreamAsync(int index, BodyPart part, CancellationToken cancellationToken = new(),
 		ITransferProgress progress = null)
 	{
 		throw new NotImplementedException();
@@ -1158,7 +1082,6 @@ internal class ExchangeMailFolder : IMailFolder
 		Enum.GetValues(typeof(MessageFlags)).Cast<MessageFlags>().ToList().ForEach(flag =>
 		{
 			if (flags.HasFlag(flag))
-			{
 				switch (flag)
 				{
 					case MessageFlags.Seen:
@@ -1168,17 +1091,16 @@ internal class ExchangeMailFolder : IMailFolder
 						exchangeFlags.Add(EmailMessageSchema.IsResponseRequested);
 						break;
 					case MessageFlags.Draft:
-						exchangeFlags.Add(EmailMessageSchema.IsDraft);
+						exchangeFlags.Add(ItemSchema.IsDraft);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
 				}
-			}
 		});
 
 		var items = _service
 			.FindItems(_folder.Value.Id, new UidSearchQuery(uids).ToExchangeSearchFilter(),
-				new ItemView(Int32.MaxValue))
+				new ItemView(int.MaxValue))
 			.Items
 			.AsEnumerable();
 
@@ -1198,39 +1120,8 @@ internal class ExchangeMailFolder : IMailFolder
 		);
 
 		return updatedItems
-			.Select(updatedItem => new UniqueId(UInt32.Parse(updatedItem.ReturnedItem.Id.UniqueId)))
+			.Select(updatedItem => new UniqueId(uint.Parse(updatedItem.ReturnedItem.Id.UniqueId)))
 			.ToList();
-	}
-
-	private static void UpdateEmail(IStoreFlagsRequest request, Item item, List<PropertyDefinition> exchangeFlags)
-	{
-		if (item is not EmailMessage emailMessage) 
-			return;
-		
-		if (exchangeFlags.Contains(EmailMessageSchema.IsRead))
-		{
-			emailMessage.IsRead = request.Action == StoreAction.Add;
-		}
-
-		if (exchangeFlags.Contains(EmailMessageSchema.IsResponseRequested))
-		{
-			emailMessage.IsResponseRequested = request.Action == StoreAction.Add;
-		}
-
-		if (exchangeFlags.Contains(EmailMessageSchema.IsAssociated))
-		{
-			emailMessage.IsAssociated = request.Action == StoreAction.Add;
-		}
-
-		if (exchangeFlags.Contains(EmailMessageSchema.IsReadReceiptRequested))
-		{
-			emailMessage.IsReadReceiptRequested = request.Action == StoreAction.Add;
-		}
-
-		if (exchangeFlags.Contains(EmailMessageSchema.IsDeliveryReceiptRequested))
-		{
-			emailMessage.IsDeliveryReceiptRequested = request.Action == StoreAction.Add;
-		}
 	}
 
 	public bool Store(int index, IStoreFlagsRequest request, CancellationToken cancellationToken = new())
@@ -1362,6 +1253,156 @@ internal class ExchangeMailFolder : IMailFolder
 		throw new NotImplementedException();
 	}
 
+	public IEnumerator<MimeMessage> GetEnumerator()
+	{
+		throw new NotImplementedException();
+	}
+
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return GetEnumerator();
+	}
+
+	public bool Equals(IMailFolder other)
+	{
+		if (other is null)
+			return false;
+
+		return Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase);
+	}
+
+	public void Open(FolderAccess access, CancellationToken cancellationToken)
+	{
+		_folder.Value.Load();
+	}
+
+	public Task OpenAsync(FolderAccess access, CancellationToken cancellationToken)
+	{
+		return Task.Run(() => Open(access, cancellationToken), cancellationToken);
+	}
+
+	public void AddFlags(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
+	{
+		// No-op for Exchange implementation
+	}
+
+	public Task AddFlagsAsync(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
+	{
+		// No-op for Exchange implementation
+		return Task.CompletedTask;
+	}
+
+	public void RemoveFlags(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
+	{
+		// No-op for Exchange implementation
+	}
+
+	public Task RemoveFlagsAsync(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
+	{
+		// No-op for Exchange implementation
+		return Task.CompletedTask;
+	}
+
+	public void SetFlags(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
+	{
+		// No-op for Exchange implementation
+	}
+
+	public Task SetFlagsAsync(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
+	{
+		// No-op for Exchange implementation
+		return Task.CompletedTask;
+	}
+
+	public void ReplaceFlags(IList<UniqueId> uids, MessageFlags flags, CancellationToken cancellationToken)
+	{
+		// No-op for Exchange implementation
+	}
+
+	public Task ReplaceFlagsAsync(IList<UniqueId> uids, ItemId messageId, MessageFlags flags,
+		CancellationToken cancellationToken)
+	{
+		// No-op for Exchange implementation
+		return Task.CompletedTask;
+	}
+
+	public IList<IMessageSummary> Fetch(int startIndex, int endIndex, MessageSummaryItems items,
+		CancellationToken cancellationToken)
+	{
+		var itemIds = new List<ItemId>();
+		for (var i = startIndex; i <= endIndex; i++)
+			itemIds.Add(_folder.Value.FindItems(new ItemView(1) { Offset = i - 1 }).Items[0].Id);
+
+		var propertySet = new PropertySet(items.ToExchangeProperties());
+		var result = new List<IMessageSummary>();
+		foreach (var item in itemIds)
+			result.Add(new ExchangeMessageSummary(
+				EmailMessage.Bind(_service, item, propertySet))
+			);
+
+		return result;
+	}
+
+	public Task<IList<IMessageSummary>> FetchAsync(int startIndex, int endIndex, MessageSummaryItems items,
+		CancellationToken cancellationToken)
+	{
+		return Task.Run(() => Fetch(startIndex, endIndex, items, cancellationToken), cancellationToken);
+	}
+
+	private InternetAddress GetFromAddress(Item message)
+	{
+		return message switch
+		{
+			MeetingRequest meetingRequest => new MailboxAddress(
+				meetingRequest.Organizer.Name,
+				meetingRequest.Organizer.Address
+			),
+			EmailMessage emailMessage => new MailboxAddress(emailMessage.From.Name, emailMessage.From.Address),
+			PostItem postItem => new MailboxAddress(postItem.From.Name, postItem.From.Address),
+			_ => throw new NotImplementedException()
+		};
+	}
+
+
+	private IEnumerable<InternetAddress> GetToAddress(Item message)
+	{
+		return message switch
+		{
+			// Get From Address from Item
+			MeetingRequest meetingRequest => new List<InternetAddress>
+			{
+				new MailboxAddress(meetingRequest.Organizer.Name, meetingRequest.Organizer.Address)
+			},
+			EmailMessage emailMessage => emailMessage.ToRecipients
+				.Select(item => new MailboxAddress(item.Name, item.Address)),
+			PostItem postItem => new List<InternetAddress>
+			{
+				new MailboxAddress(postItem.From.Name, postItem.From.Address)
+			},
+			_ => throw new NotImplementedException()
+		};
+	}
+
+	private static void UpdateEmail(IStoreFlagsRequest request, Item item, List<PropertyDefinition> exchangeFlags)
+	{
+		if (item is not EmailMessage emailMessage)
+			return;
+
+		if (exchangeFlags.Contains(EmailMessageSchema.IsRead)) emailMessage.IsRead = request.Action == StoreAction.Add;
+
+		if (exchangeFlags.Contains(EmailMessageSchema.IsResponseRequested))
+			emailMessage.IsResponseRequested = request.Action == StoreAction.Add;
+
+		if (exchangeFlags.Contains(ItemSchema.IsAssociated))
+			emailMessage.IsAssociated = request.Action == StoreAction.Add;
+
+		if (exchangeFlags.Contains(EmailMessageSchema.IsReadReceiptRequested))
+			emailMessage.IsReadReceiptRequested = request.Action == StoreAction.Add;
+
+		if (exchangeFlags.Contains(EmailMessageSchema.IsDeliveryReceiptRequested))
+			emailMessage.IsDeliveryReceiptRequested = request.Action == StoreAction.Add;
+	}
+
 	public void Fetch(
 		IEnumerable<UniqueId> uids,
 		MessageSummaryItems items,
@@ -1378,7 +1419,7 @@ internal class ExchangeMailFolder : IMailFolder
 				break;
 
 			var mailmessage = EmailMessage.Bind(_service, item, propertySet);
-			var uniqueId = new UniqueId(UInt32.Parse(mailmessage.Id.UniqueId));
+			var uniqueId = new UniqueId(uint.Parse(mailmessage.Id.UniqueId));
 			callback?.Invoke(uniqueId);
 			progress.Report(1, itemIds.Count);
 
@@ -1423,15 +1464,5 @@ internal class ExchangeMailFolder : IMailFolder
 	{
 		// No-op for Exchange implementation
 		return Task.CompletedTask;
-	}
-
-	public IEnumerator<MimeMessage> GetEnumerator()
-	{
-		throw new NotImplementedException();
-	}
-
-	IEnumerator IEnumerable.GetEnumerator()
-	{
-		return GetEnumerator();
 	}
 }
