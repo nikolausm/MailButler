@@ -1,4 +1,4 @@
-using MailButler.Api.Options;
+using MailButler.Options;
 using MailButler.UseCases.Components.CheckConnections;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
 using MailButler.UseCases.Solutions.ForwardToGetMyInvoices;
@@ -14,14 +14,14 @@ public sealed class BackgroundServiceWorker : Microsoft.Extensions.Hosting.Backg
 {
 	private readonly IServiceScopeFactory _factory;
 	private readonly ILogger<BackgroundServiceWorker> _logger;
-	private readonly IOptions<MailButlerOptions> _mailButlerOptions;
+	private readonly IOptions<MailButlerApiOptions> _mailButlerOptions;
 	private readonly BackgroundServiceQueue _queue;
 
 	public BackgroundServiceWorker(
 		IServiceScopeFactory factory,
 		ILogger<BackgroundServiceWorker> logger,
 		BackgroundServiceQueue queue,
-		IOptions<MailButlerOptions> mailButlerOptions
+		IOptions<MailButlerApiOptions> mailButlerOptions
 	)
 	{
 		_factory = factory;
@@ -110,7 +110,6 @@ public sealed class BackgroundServiceWorker : Microsoft.Extensions.Hosting.Backg
 							{
 								SenderAddresses = markOldEmailsAsReadOptions.SenderAddresses,
 								SmtpAccount = markOldEmailsAsReadOptions.SmtpAccount,
-								DaysToCheck = markOldEmailsAsReadOptions.DaysToCheck,
 								Accounts = _mailButlerOptions.Value.Accounts,
 								TimeSpan = markOldEmailsAsReadOptions.TimeSpan
 							}, stoppingToken

@@ -23,7 +23,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\MailButler.Configuration.AzureJson\MailButler.Configuration.AzureJson.csproj" />
         <ProjectReference Include="..\MailButler.Core\MailButler.Core.csproj"/>
+        <ProjectReference Include="..\MailButler.Options\MailButler.Options.csproj" />
         <ProjectReference Include="..\MailButler.UseCases\MailButler.UseCases.csproj"/>
     </ItemGroup>
 

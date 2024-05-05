@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.Configuration", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.Amazon", "MailButler.Amazon\MailButler.Amazon.csproj", "{170B4B5B-AFF3-4F7B-BB06-3A010EEF73BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailButler.Options", "MailButler.Options\MailButler.Options.csproj", "{98D8F494-2549-4FEF-95B6-16B164E1078D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,9 @@ Global
 		{170B4B5B-AFF3-4F7B-BB06-3A010EEF73BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{170B4B5B-AFF3-4F7B-BB06-3A010EEF73BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{170B4B5B-AFF3-4F7B-BB06-3A010EEF73BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98D8F494-2549-4FEF-95B6-16B164E1078D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98D8F494-2549-4FEF-95B6-16B164E1078D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98D8F494-2549-4FEF-95B6-16B164E1078D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98D8F494-2549-4FEF-95B6-16B164E1078D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

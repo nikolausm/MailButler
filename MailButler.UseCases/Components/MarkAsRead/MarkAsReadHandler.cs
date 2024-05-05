@@ -54,6 +54,7 @@ public sealed class MarkAsReadHandler : IRequestHandler<MarkAsReadRequest, MarkA
 			cancellationToken
 		);
 
+        
 		// SetFlags to MessageFlags
 		await client.Inbox.SetFlagsAsync(
 			request.Emails.Where(email => !email.IsRead)
@@ -63,5 +64,6 @@ public sealed class MarkAsReadHandler : IRequestHandler<MarkAsReadRequest, MarkA
 			true,
 			cancellationToken
 		);
+		
 	}
 }

@@ -1,8 +1,9 @@
 using MailButler.Dtos;
+using MailButler.Options;
 
-namespace MailButler.Api.Options;
+namespace MailButler.Api;
 
-public sealed class MailButlerOptions
+public sealed class MailButlerApiOptions
 {
 	public AzureJsonOptions AzureJson { get; init; } = new();
 	public List<Account> Accounts { get; init; } = new();

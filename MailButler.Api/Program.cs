@@ -1,8 +1,8 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using MailButler.Api.BackgroundService;
-using MailButler.Api.Options;
 using MailButler.Configuration.AzureJson.Extensions.Configuration;
+using MailButler.Options;
 using MailButler.UseCases.Components;
 using MailButler.UseCases.Components.Extensions.DependencyInjection;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
@@ -10,6 +10,7 @@ using MailButler.UseCases.Solutions.ForwardToGetMyInvoices;
 using MailButler.UseCases.Solutions.MarkOldEmailsAsRead;
 using MailButler.UseCases.Solutions.Spamfilter;
 using Microsoft.OpenApi.Models;
+using MailButlerApiOptions = MailButler.Api.MailButlerApiOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 var baseConfigurationBuilder = new ConfigurationBuilder()
@@ -24,7 +25,7 @@ var baseConfiguration = baseConfigurationBuilder
 	.Build();
 
 var configuration = baseConfigurationBuilder
-	.AddAzureJson<MailButlerOptions>(
+	.AddAzureJson<MailButlerApiOptions>(
 		baseConfiguration["MailButler:AzureJson:ContainerRoot"] ??
 		throw new Exception("AzureJson:ContainerRoot is not set"),
 		baseConfiguration["MailButler:AzureJson:FileName"] ?? throw new Exception("AzureJson:FileName is not set"),
@@ -61,7 +62,7 @@ builder.Services.AddSwaggerGen(options =>
 		Title = assemblyName.Name
 	});
 });
-builder.Services.Configure<MailButlerOptions>(configuration.GetSection("MailButler"));
+builder.Services.Configure<MailButlerApiOptions>(configuration.GetSection("MailButler"));
 builder.Services.AddTransient<AmazonOrderSummaryAction>();
 builder.Services.AddTransient<ForwardToGetMyInvoicesAction>();
 builder.Services.AddTransient<DeleteFromKnownSenderAction>();

@@ -24,7 +24,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="coverlet.collector" Version="6.0.0">
+        <PackageReference Include="coverlet.collector" Version="6.0.2">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
@@ -33,6 +33,7 @@
     <ItemGroup>
         <ProjectReference Include="..\MailButler.Api\MailButler.Api.csproj"/>
         <ProjectReference Include="..\MailButler.Configuration.AzureJson\MailButler.Configuration.AzureJson.csproj"/>
+        <ProjectReference Include="..\MailButler.Options\MailButler.Options.csproj" />
     </ItemGroup>
 
 </Project>

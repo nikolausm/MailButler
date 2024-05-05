@@ -1,4 +1,4 @@
-namespace MailButler.Api.Options;
+namespace MailButler.Options;
 
 public sealed class AzureJsonOptions
 {

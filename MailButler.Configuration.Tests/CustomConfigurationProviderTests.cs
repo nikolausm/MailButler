@@ -1,6 +1,7 @@
 using FluentAssertions;
-using MailButler.Api.Options;
+using MailButler.Api;
 using MailButler.Configuration;
+using MailButler.Options;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -30,7 +31,7 @@ public class CustomConfigurationProviderTests
 					)
 				)!
 			);
-		var provider = new CustomConfigurationProvider<MailButlerOptions>(
+		var provider = new CustomConfigurationProvider<MailButlerApiOptions>(
 			mock.Object,
 			"MailButler"
 		);

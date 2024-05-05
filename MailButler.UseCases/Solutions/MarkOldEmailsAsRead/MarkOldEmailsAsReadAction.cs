@@ -106,7 +106,7 @@ public sealed class MarkOldEmailsAsReadAction
 			emails = emails is null
 				? SearchQuery.FromContains(email)
 				: emails.Or(SearchQuery.FromContains(email));
-
+		
 		return dateSearch
 			.And(SearchQuery.NotSeen)
 			.And(emails);

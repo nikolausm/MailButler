@@ -1,6 +1,6 @@
 using MailButler.Dtos;
 
-namespace MailButler.Api.Options;
+namespace MailButler.Options;
 
 public sealed class ForwardToGetMyInvoicesOptions
 {
