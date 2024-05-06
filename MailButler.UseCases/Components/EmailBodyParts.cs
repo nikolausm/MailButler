@@ -12,7 +12,7 @@ public sealed class EmailBodyParts
 		StringBuilder htmlBody = new();
 		htmlBody.AppendLine("<center id='logo'>");
 		htmlBody.AppendLine(MiniconSvgImage);
-		htmlBody.AppendLine("<h1>MailButler - Amazon Summary</h1>");
+		htmlBody.AppendLine("<h1>MailButler</h1>");
 		htmlBody.AppendLine("</center>");
 		return htmlBody.ToString();
 	}

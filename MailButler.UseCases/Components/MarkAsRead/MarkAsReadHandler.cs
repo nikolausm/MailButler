@@ -54,7 +54,17 @@ public sealed class MarkAsReadHandler : IRequestHandler<MarkAsReadRequest, MarkA
 			cancellationToken
 		);
 
-        
+
+		request.Emails.Select(email => new UniqueId(email.Id.Validity, email.Id.Id))
+			.ToList()
+			.ForEach(
+				uniqueId => client.Inbox.Store(
+					uniqueId,
+					new StoreFlagsRequest(StoreAction.Add, MessageFlags.Seen) { Silent = true })
+			);
+
+		await client.Inbox.ExpungeAsync(cancellationToken);
+
 		// SetFlags to MessageFlags
 		await client.Inbox.SetFlagsAsync(
 			request.Emails.Where(email => !email.IsRead)
@@ -64,6 +74,7 @@ public sealed class MarkAsReadHandler : IRequestHandler<MarkAsReadRequest, MarkA
 			true,
 			cancellationToken
 		);
-		
+
+		await client.Inbox.ExpungeAsync(cancellationToken);
 	}
 }

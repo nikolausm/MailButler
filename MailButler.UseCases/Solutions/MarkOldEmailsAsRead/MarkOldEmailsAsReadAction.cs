@@ -45,8 +45,8 @@ public sealed class MarkOldEmailsAsReadAction
 			"Found {EmailCount} emails to be read",
 			tasks.Sum(t => t.Result.Result.Count)
 		);
-
-		foreach (var email in tasks.SelectMany(task => task.Result.Result))
+		
+		foreach (Email email in tasks.SelectMany(task => task.Result.Result))
 			_logger.LogDebug("Email: {Email}", email);
 
 		#endregion
