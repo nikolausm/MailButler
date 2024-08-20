@@ -70,6 +70,12 @@ public sealed class MarkOldEmailsAsReadAction
 
 		#endregion
 
+		if (!markAsRead.Any())
+		{
+			_logger.LogInformation("No emails to mark as read");
+			return;
+		}
+		
 		#region Send Summary Email
 
 		// Send summary email
