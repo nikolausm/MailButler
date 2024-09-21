@@ -1,0 +1,14 @@
+﻿services:
+  mailbutler.api:
+    image: mailbutler.api
+    container_name: mailbutler.api
+    ports:
+      - "2400:8080"
+    build:
+      context: .
+      dockerfile: MailButler.Api/Dockerfile
+    networks: 
+      - mailbutler
+networks:
+  mailbutler:
+    driver: bridge

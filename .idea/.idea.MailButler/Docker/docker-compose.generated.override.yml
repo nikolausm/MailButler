@@ -1,0 +1,22 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  mailbutler.api:
+    build:
+      context: "/Users/michaelnikolaus/Projects/MailButler"
+      dockerfile: "MailButler.Api/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/MailButler.Api.dll"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "mailbutler.api:dev"
+    ports: []
+    volumes:
+    - "/Users/michaelnikolaus/.microsoft/usersecrets:/home/app/.microsoft/usersecrets"
+    - "/Users/michaelnikolaus/.nuget/packages:/home/app/.nuget/packages"
+    - "/Users/michaelnikolaus/Projects/MailButler/MailButler.Api:/app:rw"
+    - "/Users/michaelnikolaus/Projects/MailButler:/src:rw"
+    working_dir: "/app"

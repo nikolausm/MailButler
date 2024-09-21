@@ -1,8 +1,6 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using MailButler.Api.BackgroundService;
-using MailButler.Configuration.AzureJson.Extensions.Configuration;
-using MailButler.Options;
 using MailButler.UseCases.Components;
 using MailButler.UseCases.Components.Extensions.DependencyInjection;
 using MailButler.UseCases.Solutions.Amazon.AmazonOrderSummary;
@@ -13,27 +11,16 @@ using Microsoft.OpenApi.Models;
 using MailButlerApiOptions = MailButler.Api.MailButlerApiOptions;
 
 var builder = WebApplication.CreateBuilder(args);
-var baseConfigurationBuilder = new ConfigurationBuilder()
+var configuration = new ConfigurationBuilder()
 	.AddJsonFile("appsettings.json")
 	.AddJsonFile(
 		"appsettings." + Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") + ".json",
-		true
-	);
-var baseConfiguration = baseConfigurationBuilder
-	.AddEnvironmentVariables()
-	.AddUserSecrets<Program>()
-	.Build();
-
-var configuration = baseConfigurationBuilder
-	.AddAzureJson<MailButlerApiOptions>(
-		baseConfiguration["MailButler:AzureJson:ContainerRoot"] ??
-		throw new Exception("AzureJson:ContainerRoot is not set"),
-		baseConfiguration["MailButler:AzureJson:FileName"] ?? throw new Exception("AzureJson:FileName is not set"),
-		"MailButler"
+		false
 	)
 	.AddEnvironmentVariables()
 	.AddUserSecrets<Program>()
 	.Build();
+
 
 // Add services to the container.
 builder.Services.AddControllers()

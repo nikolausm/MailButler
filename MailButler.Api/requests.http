@@ -1,0 +1,4 @@
+### Do all operations
+GET {{BaseUrl}}/Actions?action=All
+Accept: application/json
+###

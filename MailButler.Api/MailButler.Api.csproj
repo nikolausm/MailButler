@@ -4,7 +4,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <InvariantGlobalization>true</InvariantGlobalization>
-        <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <UserSecretsId>7444ed2c-1530-4d27-ba50-f2268669fb12</UserSecretsId>
         <AssemblyVersion>2.0.0</AssemblyVersion>
         <FileVersion>2.0.0</FileVersion>
@@ -25,5 +25,13 @@
         <ProjectReference Include="..\MailButler.Dtos\MailButler.Dtos.csproj"/>
         <ProjectReference Include="..\MailButler.Options\MailButler.Options.csproj" />
         <ProjectReference Include="..\MailButler.UseCases\MailButler.UseCases.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Content Update="appsettings.Development.json">
+        <DependentUpon>appsettings.json</DependentUpon>
+      </Content>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 </Project>
