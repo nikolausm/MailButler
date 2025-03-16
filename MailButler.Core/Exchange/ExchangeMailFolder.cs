@@ -15,6 +15,7 @@ internal class ExchangeMailFolder : IMailFolder
 	private readonly Lazy<Folder> _folder;
 	private readonly ExchangeService _service;
 	private readonly IDictionary<UniqueId, EmailMessage> _fetcheItems;
+	private IMailFolder _mailFolderImplementation;
 
 	public ExchangeMailFolder(ExchangeService service, WellKnownFolderName folderName)
 	{
@@ -74,7 +75,9 @@ internal class ExchangeMailFolder : IMailFolder
 	public int FirstUnread { get; }
 	public int Unread => _folder.Value.UnreadCount;
 
-	public bool IsOpen => throw new NotImplementedException();
+	public bool IsOpen => _mailFolderImplementation.IsOpen;
+	public bool CanOpen => _mailFolderImplementation.CanOpen;
+
 	public bool Exists { get; }
 	public ulong HighestModSeq { get; }
 	public uint UidValidity { get; }

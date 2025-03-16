@@ -13,7 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Extensions.Dictionary" Version="2.8.0"/>
-        <PackageReference Include="Fody" Version="6.9.1">
+        <PackageReference Include="Fody" Version="6.9.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
